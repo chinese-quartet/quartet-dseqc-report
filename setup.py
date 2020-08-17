@@ -3,6 +3,7 @@
 
 from setuptools import setup, find_packages
 
+
 version = '0.1.0'
 
 setup(
@@ -19,7 +20,9 @@ setup(
     packages = find_packages(),
     include_package_data = True,
     install_requires = [
-        'multiqc'
+        'multiqc==1.9',
+        'plotly==4.9.0',
+        'pandas==1.1.0'
     ],
     entry_points = {
         'multiqc.modules.v1': [
@@ -34,7 +37,7 @@ setup(
             'execution_start = quartet_dnaseq_report.custom_code:quartet_dnaseq_report_execution_start'
         ],
         'multiqc.templates.v1': [
-            'default = quartet_dnaseq_report.templates.default'
+            'quartet_dnaseq_report = quartet_dnaseq_report.templates.default'
         ]
     },
     classifiers = [

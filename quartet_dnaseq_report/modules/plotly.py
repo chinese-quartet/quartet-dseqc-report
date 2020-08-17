@@ -38,6 +38,7 @@ def plot(fig, pconfig):
   <script type="text/javascript">
     var figure = JSON.parse($("#{data_id}").html());
     figure.layout.autosize = true
+    figure.layout.height = 610
     Plotly.newPlot("{id}", figure.data, figure.layout);
 
     // When plotly is working, hide something

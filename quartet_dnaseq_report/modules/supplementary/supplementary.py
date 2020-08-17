@@ -3,11 +3,18 @@
 """ Quartet DNAseq Report plugin module """
 
 from __future__ import print_function
+import os
+import base64
 import logging
 from multiqc.modules.base_module import BaseMultiqcModule
 
 # Initialise the main MultiQC logger
 log = logging.getLogger('multiqc')
+
+def read_image(image):
+    with open(image, "rb") as image_file:
+        encoded_string = base64.b64encode(image_file.read())
+        return encoded_string.decode('utf-8')
 
 class MultiqcModule(BaseMultiqcModule):
     def __init__(self):
@@ -25,7 +32,7 @@ class MultiqcModule(BaseMultiqcModule):
             <div class='method'>
                 <div class='small-12 columns'>
                     <h3 class='section-header black'>Method</h3>
-                    <img src='quartet_dnaseq_report/modules/supplementary/assets/img/quartet-dna-pipeline.png' title='quartet-dna-pipeline' width='70%' height='70%'/>
+                    <img src="data:image/png;base64,{image}" title='quartet-dna-pipeline' width='70%' height='70%'/>
                     <p>
                         We accepted fastq files, and used sentieon to call germline small variants. [<a class='reference' href='#ref-1'>1</a>] Whole-genome sequencing quality control consists of pre-alignment, post-alignment and variants calling quality control.
                     </p>
@@ -83,7 +90,7 @@ class MultiqcModule(BaseMultiqcModule):
                 <p>This quality control report is only for this specific test data set and doesn’t represent an evaluation of the business level of the sequencing company. This report is only used for scientific research, not for clinical or commercial use. We don’t bear any economic and legal liabilities for any benefits or losses (direct or indirect) from using the results of this report.</p>
                 </div>
             </div>
-            '''
+            '''.format(image=read_image(os.path.join(os.path.dirname(__file__), 'assets', 'img', 'quartet-dna-pipeline_mqc.png')))
 
         self.add_section(
             name = '',

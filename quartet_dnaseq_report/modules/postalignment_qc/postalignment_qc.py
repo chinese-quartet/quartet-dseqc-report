@@ -94,24 +94,22 @@ class MultiqcModule(BaseMultiqcModule):
             len(self.qualimap_bamqc_gc_content_dist)
         )
         # Go no further if nothing found
-        if num_parsed == 0:
-            return 0
+        if num_parsed != 0:
+            try:
+                covs = config.qualimap_config['general_stats_coverage']
+                assert type(covs) == list
+                assert len(covs) > 0
+                covs = [str(i) for i in covs]
+                log.debug('Custom Qualimap thresholds: {}'.format(', '.join([i for i in covs])))
+            except (AttributeError, TypeError, AssertionError):
+                covs = [1, 5, 10, 30, 50]
+                covs = [str(i) for i in covs]
+                log.debug('Using default Qualimap thresholds: {}'.format(', '.join([i for i in covs])))
+            self.covs = covs
 
-        try:
-            covs = config.qualimap_config['general_stats_coverage']
-            assert type(covs) == list
-            assert len(covs) > 0
-            covs = [str(i) for i in covs]
-            log.debug('Custom Qualimap thresholds: {}'.format(', '.join([i for i in covs])))
-        except (AttributeError, TypeError, AssertionError):
-            covs = [1, 5, 10, 30, 50]
-            covs = [str(i) for i in covs]
-            log.debug('Using default Qualimap thresholds: {}'.format(', '.join([i for i in covs])))
-        self.covs = covs
-
-        # Make the plots for the report
-        if len(self.qualimap_bamqc_coverage_hist)>0 and len(self.qualimap_bamqc_insert_size_hist)>0 and len(self.qualimap_bamqc_gc_content_dist)>0:
-            QM_BamQC.report_sections(self)
+            # Make the plots for the report
+            if len(self.qualimap_bamqc_coverage_hist)>0 and len(self.qualimap_bamqc_insert_size_hist)>0 and len(self.qualimap_bamqc_gc_content_dist)>0:
+                QM_BamQC.report_sections(self)
 
     # Helper functions
     def get_s_name(self, f):

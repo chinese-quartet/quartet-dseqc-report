@@ -691,11 +691,13 @@ input.form-control[type=color]{
     vertical-align: middle;
 }
 
+.mqc-section hr {
+    margin-top: 0px;
+}
 
-
-
-
-
+.mqc-section table {
+    margin-bottom: 0px;
+}
 
 .sorthandle {
     border-right: none;
@@ -755,6 +757,11 @@ tbody .sorthandle {
     height: 500px;
     width: 100%;
     position: relative !important;
+    min-height: 500px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 18px;
 }
 .hc-plot.not_rendered {
     background-color: #ededed;
