@@ -29,7 +29,7 @@ def fig_to_json_html(fig, pconfig):
 def plot(fig, pconfig):
   data_html = fig_to_json_html(fig, pconfig)
   html = '''
-  <div class="hc-plot-wrapper" style="height: 100%;">
+  <div class="hc-plot-wrapper">
     <div id="{id}" class="hc-plot not_rendered" style="position: relative;">
       <small>loading..</small>
     </div>
