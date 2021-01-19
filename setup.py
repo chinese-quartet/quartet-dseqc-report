@@ -37,7 +37,7 @@ setup(
             'execution_start = quartet_dnaseq_report.custom_code:quartet_dnaseq_report_execution_start'
         ],
         'multiqc.cli_options.v1': [
-            'disable_plugin = example_plugin.cli:disable_plugin'
+            'disable_plugin = quartet_dnaseq_report.cli:disable_plugin'
         ],
         'multiqc.templates.v1': [
             'quartet_dnaseq_report = quartet_dnaseq_report.templates.default'
