@@ -6,6 +6,7 @@ from __future__ import print_function
 import os
 import base64
 import logging
+from multiqc import config
 from multiqc.modules.base_module import BaseMultiqcModule
 
 # Initialise the main MultiQC logger
@@ -18,6 +19,11 @@ def read_image(image):
 
 class MultiqcModule(BaseMultiqcModule):
     def __init__(self):
+                
+        # Halt execution if we've disabled the plugin
+        if config.kwargs.get('disable_plugin', True):
+            return None
+        
         # Initialise the parent module Class object
         super(MultiqcModule, self).__init__(
             name='Supplementary',
@@ -28,23 +34,37 @@ class MultiqcModule(BaseMultiqcModule):
         )
         
         html = '''
-            <!-- Method -->
-            <div class='method'>
+            <!-- Methods -->
+            <div class='methods'>
                 <div class='small-12 columns'>
-                    <h3 class='section-header black'>Method</h3>
+                    <h3 class='section-header black'>Methods</h3>
+                    <p>
+                        (1)	Tested call sets were compared with benchmark small variants using hap.py (https://github.com/Illumina/hap.py).  Precision is the fraction of called variants in the test dataset that are true, and recall is the fraction of true variants are called in the test dataset. True Positives (TP) are true variants detected in the test dataset. False Negatives (FN) are variants in the reference dataset failed to be detected in the test dataset. False Positive (FP) are variants called in the test dataset but not included in the reference dataset. Precision and recall are defined as below:
+                    </p>
+                    <p>
+                    <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=AM_HTMLorMML-full"></script>
+                    <body>
+                        <div class="formula">
+                            <span>Precision=TP/TP+FP</span>
+                            <span>Recall=TP/TP+FN</span>
+                            <span>F1=2×Precision×Recall/Precision+Recall</span>
+                        </div>
+                    </body>
+                    </p>                  
+                    <p>
+                        (2)	Mendelian concordance rate (MCR) is the number of variants following Mendelian inheritance laws divided by the total number of variants called among the four Quartet samples. Mendelian concordant variants are the variants shared by the twins (D5 and D6) and following Mendelian inheritance laws with parents (Father: F7 and Mother M8).  Mendelian analysis was performed using VBT (https://github.com/sbg/VBT-TrioAnalysis). When calculating Mendelian concordance rate of small variants, variants on large deletions were not included, because VBT takes these variants as Mendelian violations.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Pipeline -->
+            <div class='pipeline'>
+                <div class='small-12 columns'>
+                    <h3 class='section-header black'>Pipeline</h3>
+                    <p>
+                        We accepted fastq files, and used Sentieon Genomics to call germline small variants. [<a class='reference' href='#ref-1'>1</a>] The quality control consists of pre-alignment, post-alignment and variants calling quality control. Pre-alignment quality control focuses on raw fastq files and helps to determine systematic bias and library issue, such as sequencing quality issue, high GC or AT, PCR bias, adapter contaminant, cross species contamination. FastQC [<a class='reference' href='#ref-2'>2</a>] and FastQ Screen [<a class='reference' href='#ref-3'>3</a>] are used to evaluate raw reads quality. Post-alignment quality control focuses on bam files and helps to measure library performance and sample variance, such as sequencing error rate, sequencing depth and coverage consistency. Qualimap [<a class='reference' href='#ref-4'>4</a>] is used to evaluate quality of bam files. Variants calling quality control is to examine accuracy of detected variants based on reference datasets, and estimate potential sequence errors by reproducibility of monozygotic twin daughters and mendelian concordant ratio of Quartet family.
+                    </p>
                     <img src="data:image/png;base64,{image}" title='quartet-dna-pipeline' width='70%' height='70%'/>
-                    <p>
-                        We accepted fastq files, and used sentieon to call germline small variants. [<a class='reference' href='#ref-1'>1</a>] Whole-genome sequencing quality control consists of pre-alignment, post-alignment and variants calling quality control.
-                    </p>
-                    <p>
-                        Pre-alignment quality control focuses on raw fastq files and helps to determine systematic bias and library issue, such as sequencing quality issue, high GC or AT, PCR bias, adapter contaminant, cross species contamination. Fastqc [<a class='reference' href='#ref-2'>2</a>] and fastqscreen [<a class='reference' href='#ref-3'>3</a>] are used to evaluate raw reads quality.
-                    </p>
-                    <p>
-                        Post-alignment quality control focuses on bam files and helps to measure library performance and sample variance, such as sequencing error rate, sequencing depth and coverage consistency. Qualimap [<a class='reference' href='#ref-4'>4</a>] is used to evaluate quality of bam files.
-                    </p>
-                    <p>
-                        Variants calling quality control is to examine accuracy of detected variants based on reference datasets, and estimate potential sequence errors by reproducibility of monozygotic twin daughters and mendelian concordant ratio of Quartet family.
-                    </p>
                 </div>
             </div>
 
@@ -63,9 +83,9 @@ class MultiqcModule(BaseMultiqcModule):
             <div class='software'>
                 <h3 class='section-header black'>Software</h3>
                 <dl class='dl-horizontal'>
-                    <dt style='text-align:left;width:300px;font-weight:normal;margin-top:1ex'>sentieon (Fastq to VCF)</dt><dd>v2018.08.01</dd>
-                    <dt style='text-align:left;width:300px;font-weight:normal;margin-top:1ex'>Fastqc</dt><dd>v0.11.5</dd>
-                    <dt style='text-align:left;width:300px;font-weight:normal;margin-top:1ex'>Fastqscreen</dt><dd>v0.12.0</dd>
+                    <dt style='text-align:left;width:300px;font-weight:normal;margin-top:1ex'>Sentieon Genomics (FASTQ to VCF)</dt><dd>v2018.08.01</dd>
+                    <dt style='text-align:left;width:300px;font-weight:normal;margin-top:1ex'>FastQC</dt><dd>v0.11.5</dd>
+                    <dt style='text-align:left;width:300px;font-weight:normal;margin-top:1ex'>FastQ Screen</dt><dd>v0.12.0</dd>
                     <dt style='text-align:left;width:300px;font-weight:normal;margin-top:1ex'>Qualimap</dt><dd>v2.0.0</dd>
                     <dt style='text-align:left;width:300px;font-weight:normal;margin-top:1ex'>hap.py (reference datasets benchmark)</dt><dd>v0.3.7</dd>
                     <dt style='text-align:left;width:300px;font-weight:normal;margin-top:1ex'>VBT (mendelian anaysis)</dt><dd>v1.1</dd>

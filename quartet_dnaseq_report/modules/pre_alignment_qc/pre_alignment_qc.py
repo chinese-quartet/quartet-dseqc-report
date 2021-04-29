@@ -3,7 +3,7 @@
 """ Quartet DNAseq Report plugin module """
 
 from __future__ import print_function
-from collections import OrderedDict
+from collections import defaultdict, OrderedDict
 import io
 import logging
 import os
@@ -25,18 +25,23 @@ log = logging.getLogger('multiqc')
 
 class MultiqcModule(BaseMultiqcModule):
     def __init__(self):
+                
+        # Halt execution if we've disabled the plugin
+        if config.kwargs.get('disable_plugin', True):
+            return None
+        
         # Initialise the parent module Class object
         super(MultiqcModule, self).__init__(
             name='Pre-alignment Quality Control',
-            target='prealignment_qc',
-            anchor='prealignment_qc',
+            target='pre_alignment_qc',
+            anchor='pre_alignment_qc',
             href='https://github.com/clinico-omics/quartet-dnaseq-report',
             info=' is an report module to show the data quality before alignment.'
         )
 
-        # Find and load any input files for prealignment_qc
+        # Find and load any input files for pre_alignment_qc
         table_summary = []
-        for f in self.find_log_files('prealignment_qc/prealignment_qc_summary'):
+        for f in self.find_log_files('pre_alignment_qc/summary'):
             lines = f['f'].splitlines()
             keys = lines[0].split('\t')
             content = lines[1:]
@@ -50,19 +55,21 @@ class MultiqcModule(BaseMultiqcModule):
             table_summary_dic[key] = i
 
         if len(table_summary_dic) != 0:
-            self.plot_summary_table('prealignment_qc_summary', table_summary_dic)
+            self.plot_summary_table('pre_alignment_qc_summary', table_summary_dic)
         else:
-            log.debug('No file matched: prealignment_qc - prealignment_qc_summary.txt')
+            log.debug('No file matched: pre_alignment_qc - pre_alignment_qc_summary.txt')
 
+        # Set up class objects to hold parsed data()
+        self.general_stats_data = defaultdict(lambda: dict())
 
         # Find and parse unzipped FastQC reports 
         self.fastqc_data = dict()
-        for f in self.find_log_files('prealignment_qc/fastqc_data'):
+        for f in self.find_log_files('pre_alignment_qc/fastqc_data'):
             s_name = self.clean_s_name(os.path.basename(f['root']), os.path.dirname(f['root']))
             self.parse_fastqc_report(f['f'], s_name, f)
 
         # Find and parse zipped FastQC reports
-        for f in self.find_log_files('prealignment_qc/fastqc_zip', filecontents=False):
+        for f in self.find_log_files('pre_alignment_qc/fastqc_zip', filecontents=False):
             s_name = f['fn']
             if s_name.endswith('_fastqc.zip'):
                 s_name = s_name[:-11]
@@ -198,132 +205,124 @@ class MultiqcModule(BaseMultiqcModule):
         """ Create the HTML for pre-alignment qc summary """
 
         headers = OrderedDict()
-        headers['Total sequences (million)'] = {
-            'title': 'M Seqs',
-            'description': 'Total Sequences (million)',
-            'min': 0,
-            'scale': 'Blues',
-            'format': '{:.2f}'
-        }
-
-        headers['% Dup'] = {
+        headers['%Dup'] = {
             'title': '% Dups',
             'description': '% Duplicate Reads',
             'max': 100,
             'min': 0,
             'suffix': '%',
-            'scale': 'RdYlGn',
+            'scale': False,
             'format': '{:.2f}'
         }
 
-        headers['G/C ratio'] = {
-            'title': 'G/C ratio',
+        headers['%GC'] = {
+            'title': '% GC',
             'description': 'G/C ratio',
             'max': 100,
-            'format': '{:.2f}',
-            'scale': 'Reds'
+            'scale': False,
+            'format': '{:.2f}'
         }
 
-        headers['A/T ratio'] = {
-            'title': 'A/T ratio',
-            'description': 'A/T ratio',
-            'max':100,
-            'format': '{:.2f}',
-            'scale': 'Reds'
+        headers['Total Sequences (million)'] = {
+            'title': 'M Seqs',
+            'description': 'Total Sequences (million)',
+            'min': 0,
+            'scale': False,
+            'format': '{:.2f}'
         }
 
-        headers['% Human'] = {
+        headers['%Human'] = {
             'title': '% Human',
             'description': '% Human',
             'max': 100,
             'min': 0,
             'suffix': '%',
-            'scale': 'RdYlGn',
+            'scale': False,
             'format': '{:.2f}'
         }
 
-        headers['% EColi'] = {
+        headers['%EColi'] = {
             'title': '% EColi',
             'description': '% EColi',
             'max': 100,
             'min': 0,
             'suffix': '%',
-            'scale': 'RdYlGn',
-            'format': '{:.3f}'
+            'scale': False,
+            'format': '{:.2f}'
         }
 
-        headers['% Adapter'] = {
+        headers['%Adapter'] = {
             'title': '% Adapter',
             'description': '% Adapter',
             'max': 100,
             'min': 0,
             'suffix': '%',
-            'scale': 'RdYlGn',
+            'scale': False,
             'format': '{:.2f}'
         }
 
-        headers['% Vector'] = {
+        headers['%Vector'] = {
             'title': '% Vector',
             'description': '% Vector',
             'max': 100,
             'min': 0,
             'suffix': '%',
-            'scale': 'RdYlGn',
+            'scale': False,
             'format': '{:.2f}'
         }
 
-        headers['% rRNA'] = {
+        headers['%rRNA'] = {
             'title': '% rRNA',
             'description': '% rRNA',
             'max': 100,
             'min': 0,
             'suffix': '%',
-            'scale': 'RdYlGn',
+            'scale': False,
             'format': '{:.2f}'
         }
 
-        headers['% Virus'] = {
+        headers['%Virus'] = {
             'title': '% Virus',
             'description': '% Virus',
             'max': 100,
             'min': 0,
             'suffix': '%',
-            'scale': 'RdYlGn',
+            'scale': False,
             'format': '{:.2f}'
         }
 
-        headers['% Yeast'] = {
+        headers['%Yeast'] = {
             'title': '% Yeast',
             'description': '% Yeast',
             'max': 100,
             'min': 0,
             'suffix': '%',
-            'scale': 'RdYlGn',
+            'scale': False,
             'format': '{:.2f}'
         }
 
-        headers['% Mitoch'] = {
+        headers['%Mitoch'] = {
             'title': '% Mitoch',
             'description': '% Mitoch',
             'max': 100,
             'min': 0,
             'suffix': '%',
-            'scale': 'RdYlGn',
+            'scale': False,
             'format': '{:.2f}'
         }
 
-        headers['% No hits'] = {
+        headers['%No hits'] = {
             'title': '% No hits',
             'description': '% No hits',
             'max': 100,
             'min': 0,
             'suffix': '%',
-            'scale': 'RdYlGn',
+            'scale': False,
             'format': '{:.2f}'
         }
 
         table_config = {
-            'namespace': 'prealignment_qc_summary',
+            'namespace': 'pre_alignment_qc_summary',
             'id': id,
             'table_title': 'Pre-alignment QC Table Summary',
             'col1_header': 'Sample',
@@ -440,7 +439,7 @@ class MultiqcModule(BaseMultiqcModule):
         theoretical_gc = None
         theoretical_gc_raw = None
         theoretical_gc_name = None
-        for f in self.find_log_files('prealignment_qc/fastqc_theoretical_gc'):
+        for f in self.find_log_files('pre_alignment_qc/fastqc_theoretical_gc'):
             if theoretical_gc_raw is not None:
                 log.warning('Multiple FastQC Theoretical GC Content files found, now using {}'.format(f['fn']))
             theoretical_gc_raw = f['f']

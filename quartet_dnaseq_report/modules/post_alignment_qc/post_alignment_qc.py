@@ -27,24 +27,29 @@ log = logging.getLogger('multiqc')
 
 class MultiqcModule(BaseMultiqcModule):
     def __init__(self):
+                
+        # Halt execution if we've disabled the plugin
+        #if config.kwargs.get('disable_plugin', True):
+        #    return None
+        
         # Initialise the parent module Class object
         super(MultiqcModule, self).__init__(
             name='Post-alignment Quality Control',
-            target='postalignment_qc',
-            anchor='postalignment_qc',
+            target='post_alignment_qc',
+            anchor='post_alignment_qc',
             href='https://github.com/clinico-omics/quartet-dnaseq-report',
             info=' is an report module to show the data quality after alignment.'
         )
 
-        # Find and load any input files for postalignment_qc
+        # Find and load any input files for post_alignment_qc
         table_summary = []
-        for f in self.find_log_files('postalignment_qc/postalignment_qc_summary'):
+        for f in self.find_log_files('post_alignment_qc/summary'):
             lines = f['f'].splitlines()
             keys = lines[0].split('\t')
             content = lines[1:]
             for values in content:
                 table_summary.append(dict(zip(keys, values.split('\t'))))
-		
+
         table_summary_dic = {}
         for i in table_summary:
             key = i['Sample']
@@ -52,16 +57,16 @@ class MultiqcModule(BaseMultiqcModule):
             table_summary_dic[key] = i
 
         if len(table_summary_dic) != 0:
-            self.plot_summary_table('postalignment_qc_summary', table_summary_dic)
+            self.plot_summary_table('post_alignment_qc_summary', table_summary_dic)
         else:
-            log.debug('No file matched: postalignment_qc - postalignment_qc_summary.txt')	
+            log.debug('No file matched: post_alignment_qc - post_alignment.txt')	
 
         # Set up class objects to hold parsed data()
         self.general_stats_data = defaultdict(lambda: dict())
 
         # General stats - genome_results.txt
         self.qualimap_bamqc_genome_results = dict()
-        for f in self.find_log_files('postalignment_qc/bamqc/genome_results'):
+        for f in self.find_log_files('post_alignment_qc/bamqc/genome_results'):
             QM_BamQC.parse_genome_results(self, f)
         self.qualimap_bamqc_genome_results = self.ignore_samples(self.qualimap_bamqc_genome_results)
         if len(self.qualimap_bamqc_genome_results) > 0:
@@ -69,20 +74,20 @@ class MultiqcModule(BaseMultiqcModule):
 
         # Coverage - coverage_histogram.txt
         self.qualimap_bamqc_coverage_hist = dict()
-        for f in self.find_log_files('postalignment_qc/bamqc/coverage', filehandles=True):
+        for f in self.find_log_files('post_alignment_qc/bamqc/coverage', filehandles=True):
             QM_BamQC.parse_coverage(self, f)
         self.qualimap_bamqc_coverage_hist = self.ignore_samples(self.qualimap_bamqc_coverage_hist)
 
         # Insert size - insert_size_histogram.txt
         self.qualimap_bamqc_insert_size_hist = dict()
-        for f in self.find_log_files('postalignment_qc/bamqc/insert_size', filehandles=True):
+        for f in self.find_log_files('post_alignment_qc/bamqc/insert_size', filehandles=True):
             QM_BamQC.parse_insert_size(self, f)
         self.qualimap_bamqc_insert_size_hist = self.ignore_samples(self.qualimap_bamqc_insert_size_hist)
 
         # GC distribution - mapped_reads_gc-content_distribution.txt
         self.qualimap_bamqc_gc_content_dist = dict()
         self.qualimap_bamqc_gc_by_species = dict()  # {'HUMAN': data_dict, 'MOUSE': data_dict}
-        for f in self.find_log_files('postalignment_qc/bamqc/gc_dist', filehandles=True):
+        for f in self.find_log_files('post_alignment_qc/bamqc/gc_dist', filehandles=True):
             QM_BamQC.parse_gc_dist(self, f)
         self.qualimap_bamqc_gc_content_dist = self.ignore_samples(self.qualimap_bamqc_gc_content_dist)
         self.qualimap_bamqc_gc_by_species = self.ignore_samples(self.qualimap_bamqc_gc_by_species)
@@ -123,33 +128,33 @@ class MultiqcModule(BaseMultiqcModule):
         """ Create the HTML for pre-alignment qc summary """
         
         headers = OrderedDict()
-        headers['% GC'] = {
-            'title': '% GC',
-            'description': 'Average % GC Content',
+        headers['%Mapping'] = {
+            'title': '% Aligned',
+            'description': '% mapped reads',
             'max': 100,
             'min': 0,
             'suffix': '%',
-            'scale': 'RdYlGn',
-            'format': '{:.2f}'
+            'scale': False,
+            'format': '{0:.2f}'
         }
 
-        headers['Median_insert_size'] = {
+        headers['%Mismatch Rate'] = {
+            'title': '% Mismatch',
+            'description': 'Mismatch rate',
+            'max': 100,
+            'min': 0,
+            'suffix': '%',
+            'scale': False,
+            'format': '{0:.2f}'
+        }
+
+        headers['Mendelian Insert Size'] = {
             'title': 'Ins. size',
             'description': 'Median insert size',
             'min': 0,
-            'scale': 'PuOr',
+            'scale': False,
             'format': '{:,.0f}'
         }
-
-        for c in [1,5,10,30]:
-            headers['% Coverage_over_{}X'.format(c)] = {
-                'title': '&ge; {}X'.format(c),
-                'description': 'Fraction of genome with at least {}X coverage'.format(c),
-                'max': 100,
-                'min': 0,
-                'suffix': '%',
-                'scale': 'Blues'
-            }
 
         for c in [20,30]:
             headers['% Q{}'.format(c)] = {
@@ -158,40 +163,37 @@ class MultiqcModule(BaseMultiqcModule):
                 'max': 100,
                 'min': 0,
                 'suffix': '%',
-                'scale': 'RdYlGn-rev'
+                'scale': False
             }
 
-        headers['Median_coverage'] = {
+        headers['Mean Coverage'] = {
+            'title': 'Mean cov',
+            'description': 'Mean coverage',
+            'min': 0,
+            'suffix': 'X',
+            'scale': False
+        }
+        
+        headers['Median Coverage'] = {
             'title': 'Median cov',
             'description': 'Median coverage',
             'min': 0,
             'suffix': 'X',
-            'scale': 'BuPu'
+            'scale': False
         }
-
-        headers['% Mapping'] = {
-            'title': '% Aligned',
-            'description': '% mapped reads',
-            'max': 100,
-            'min': 0,
-            'suffix': '%',
-            'scale': 'YlGn',
-            'format': '{0:.2f}'
-        }
-
-        headers['% Mismatch_rate'] = {
-            'title': '% Mismatch',
-            'description': 'Mismatch rate',
-            'max': 100,
-            'min': 0,
-            'suffix': '%',
-            'scale': 'OrRd',
-            'format': '{0:.2f}'
-        }
-
-
+       
+        for c in [1,5,10,30]:
+            headers['PCT_{}X'.format(c)] = {
+                'title': '&ge; {}X'.format(c),
+                'description': 'Fraction of genome with at least {}X coverage'.format(c),
+                'max': 100,
+                'min': 0,
+                'suffix': '%',
+                'scale': False
+            }
+        
         table_config = {
-            'namespace': 'postalignment_qc_summary',
+            'namespace': 'post_alignment_qc_summary',
             'id': id,
             'table_title': 'Post-alignment QC Table Summary',
             'col1_header': 'Sample',
