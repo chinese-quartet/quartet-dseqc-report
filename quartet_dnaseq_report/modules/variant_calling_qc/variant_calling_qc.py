@@ -16,7 +16,7 @@ import plotly.express as px
 import plotly.figure_factory as ff
 
 from multiqc import config
-from multiqc.plots import table, linegraph
+from multiqc.plots import table, linegraph, scatter
 from multiqc.modules.base_module import BaseMultiqcModule
 from quartet_dnaseq_report.modules.plotly import plot as plotly_plot
 
@@ -78,10 +78,6 @@ class MultiqcModule(BaseMultiqcModule):
             df["mean"] = df["mean"].round(2)
             df["sd"] = df["sd"].round(2)
             df["result"] = df["mean"].astype("string").str.cat(df["sd"].astype("string"), sep = " ± ")
-
-            # F1-score of this batch
-            f1_snv = df[(df.type == "SNV") & (df.indicator == "F1-score")]["mean"].to_list()[0]
-            f1_indel = df[(df.type == "INDEL") & (df.indicator == "F1-score")]["mean"].to_list()[0]
 
             df = df[["type", "result", "indicator"]]
             snv_df = df[df["type"] == "SNV"].T
@@ -150,10 +146,6 @@ class MultiqcModule(BaseMultiqcModule):
             quartet_indel_df["sd"] = quartet_indel_df["sd"].round(2)
             quartet_indel_df["MCR"] = quartet_indel_df["mean"].astype("string").str.cat(quartet_indel_df["sd"].astype("string"), sep = " ± ")
         
-        # MCR of this batch
-        mcr_snv = quartet_snv_df["MCR"].to_list()[0]
-        mcr_indel = quartet_indel_df["MCR"].to_list()[0]
-        
         df = pd.concat([quartet_snv_df, quartet_indel_df], axis = 0).reset_index(drop = True)
 
         # Plot detailed numbers of performance assessment based on Quartet genetic built-in truth
@@ -170,15 +162,7 @@ class MultiqcModule(BaseMultiqcModule):
             pop_i = i.pop('Type')
             quartet_mendelian_summary_dic[key] = i
         
-        # Prepare data for scatter plot
-        history_tmp_df = history_df[["mendelian", "f1", "type"]]
-        history_tmp_df.columns = ["Mendelian Concordance Rate", "F1-score", "Type"]
-        history_tmp_df["Batch"] = "Rest Submmited Datasets"
-        # Add the F1-score and MCR info of this batch
-        this_batch = pd.DataFrame([[mcr_snv, f1_snv, "SNV", "Your Datasets"], [mcr_indel, f1_indel, "INDEL", "Your Datasets"]], columns=["Mendelian Concordance Rate", "F1-score", "Type", "Batch"])
-        figure_data = pd.concat([history_tmp_df, this_batch], axis = 0)
-
-        self.assessment_based_on_quartet_builtin_truth('quartet_mendelian_summary', quartet_mendelian_summary_dic, figure_data)
+        self.assessment_based_on_quartet_builtin_truth('quartet_mendelian_summary', quartet_mendelian_summary_dic)
 
         ## snv_indel_summary (variants.calling.qc.txt)
         for f in self.find_log_files('variant_calling_qc/snv_indel_summary'):
@@ -190,6 +174,7 @@ class MultiqcModule(BaseMultiqcModule):
         else:
             snv_indel_summary = []
             df = snv_indel_df
+
             # Transfer into the required format
             keys = df.columns.tolist()
             for index in df.index:
@@ -247,7 +232,53 @@ class MultiqcModule(BaseMultiqcModule):
             
             self.detailed_based_on_quartet_builtin_truth('mendelian_summary', mendelian_summary_dic)
     
-    
+        # Figure data
+        # F1-score of this batch
+        f1_snv = snv_indel_df[["Sample", "SNV F1"]]
+        f1_snv.columns = ["Sample", "F1-score"]
+        f1_snv["Type"] = "SNV"
+        snv_mcr = []
+        for index, row in f1_snv.iterrows():
+            if "_1_" in row.Sample:
+                MCR = snv_tmp[snv_tmp.Family == "Family 1"]["SNV MCR Rate"].to_list()[0]
+            elif "_2_" in row.Sample:
+                MCR = snv_tmp[snv_tmp.Family == "Family 2"]["SNV MCR Rate"].to_list()[0]
+            elif "_3_" in row.Sample:
+                MCR = snv_tmp[snv_tmp.Family == "Family 3"]["SNV MCR Rate"].to_list()[0]
+            snv_mcr.append(MCR)
+
+        f1_snv_mcr = pd.concat([f1_snv, pd.DataFrame(snv_mcr, columns = ["MCR"])], axis = 1)
+        
+        f1_indel = snv_indel_df[["Sample", "INDEL F1"]]
+        f1_indel.columns = ["Sample", "F1-score"]
+        f1_indel["Type"] = "INDEL"
+        indel_mcr = []
+        for index, row in f1_indel.iterrows():
+            if "_1_" in row.Sample:
+                MCR = indel_tmp[indel_tmp.Family == "Family 1"]["INDEL MCR Rate"].to_list()[0]
+            elif "_2_" in row.Sample:
+                MCR = indel_tmp[indel_tmp.Family == "Family 2"]["INDEL MCR Rate"].to_list()[0]
+            elif "_3_" in row.Sample:
+                MCR = indel_tmp[indel_tmp.Family == "Family 3"]["INDEL MCR Rate"].to_list()[0]
+            indel_mcr.append(MCR)
+
+        f1_indel_mcr = pd.concat([f1_indel, pd.DataFrame(indel_mcr, columns = ["MCR"])], axis = 1)
+        
+        this_batch = pd.concat([f1_snv_mcr, f1_indel_mcr], axis = 0)
+        this_batch["Batch"] = "Your Datasets"
+
+        # Prepare data for scatter plot
+        history_tmp_df = history_df[["sample", "mendelian", "f1", "type"]]
+        history_tmp_df.columns = ["Sample", "MCR", "F1-score", "Type"]
+        history_tmp_df["Batch"] = "Rest Submmited Datasets"
+        # Add the F1-score and MCR info of this batch
+        figure_data = pd.concat([history_tmp_df, this_batch], axis = 0)
+        
+        indel_fig_data = figure_data[figure_data.Type == "INDEL"]
+        self.quartet_scatter_plot(indel_fig_data, "indel_performance", "INDEL")
+        snv_fig_data = figure_data[figure_data.Type == "SNV"]
+        self.quartet_scatter_plot(snv_fig_data, "snv_performance", "SNV")
+
     # Plot functions    
     ## Assessment based on reference datasets (v202103)
     def assessment_based_on_reference_datasets(self, id, data, title='Assessment based on reference datasets', section_name='Assessment based on reference datasets', description="The reference dataset version is v202103.", helptext=None):
@@ -304,7 +335,7 @@ class MultiqcModule(BaseMultiqcModule):
         )
     
     ## Assessment based on Quartet family-dependent built-in genetic truth
-    def assessment_based_on_quartet_builtin_truth(self, id, data, figure_data, title='Assessment based on Quartet family-dependent built-in genetic truth', section_name='Assessment based on Quartet family-dependent built-in genetic truth', description="", helptext=None):
+    def assessment_based_on_quartet_builtin_truth(self, id, data, title='Assessment based on Quartet family-dependent built-in genetic truth', section_name='Assessment based on Quartet family-dependent built-in genetic truth', description="", helptext=None):
         """ Create the HTML for assessment based on reference datasets """
         
         headers = OrderedDict()
@@ -342,48 +373,45 @@ class MultiqcModule(BaseMultiqcModule):
             description = description if description else '',
             plot = table.plot(data, headers, table_config)
         )
-
-        # Plot figures
-        snv_fig_data = figure_data[figure_data.Type == "SNV"]
-        fig = px.scatter(snv_fig_data, title='SNV', x='F1-score', y='Mendelian Concordance Rate', color='Batch', template='simple_white', hover_data={'F1-score': ':.3f', 'Mendelian Concordance Rate': ':.3f'}, height = 650)
-        #fig.update_layout(legend=dict(orientation='h', yanchor='bottom', y= -0.2, xanchor='center', x = 0.4))
-        html = plotly_plot(fig, {
-            'id': id + '_plot',
-            'data_id': id + '_data',
-            'title': title,
-            'auto_margin': True
-        })
     
-        # Add a report section with the scatter plot
-        self.add_section(
-            name = '',
-            anchor = id + '_anchor2',
-            description = '',
-            helptext = '',
-            plot = html
-        )
+    ## Plot scatter
+    def quartet_scatter_plot(self, figure_data, pconfig_id, pconfig_title):
+        data = dict()
+        for index, row in figure_data.iterrows():
+            s_name = row["Sample"]
+            data[s_name] = {
+                'x': row["F1-score"],
+                'y': row["MCR"]
+            }
 
-        indel_fig_data = figure_data[figure_data.Type == "INDEL"]
-        fig = px.scatter(indel_fig_data, title='INDEL', x='F1-score', y='Mendelian Concordance Rate', color='Batch', template='simple_white', hover_data={'F1-score': ':.3f', 'Mendelian Concordance Rate': ':.3f'}, height = 650)
-        #fig.update_layout(legend=dict(orientation='h', yanchor='bottom', y= -0.2, xanchor='center', x = 0.4))
+            if row["Batch"] == "Your Datasets":
+                # blue
+                data[s_name]['color'] = 'rgba(109, 164, 202, 0.9)'
+            else:
+                # yellow
+                data[s_name]['color'] = 'rgba(250, 160, 81, 0.8)'
+                # green: rgba(43, 159, 43, 0.8)
+        
+        print(data)
+        
+        pconfig = {
+            'id': pconfig_id,
+            'title': pconfig_title,
+            'xlab': 'F1-score',
+            'ylab': 'Mendelian Concordance Rate',
+        }
 
-        html = plotly_plot(fig, {
-            'id': id + '_plot',
-            'data_id': id + '_data',
-            'title': title,
-            'auto_margin': True
-        })
-    
-        # Add a report section with the scatter plot
-        self.add_section(
-            name = '',
-            anchor = id + '_anchor2',
-            description = '',
-            helptext = '',
-            plot = html
-        )
+        if len(data) > 0:
+            self.add_section (
+                name = 'Performance',
+                anchor = 'peddy-relatedness-plot',
+                description = """Points are coloured as follows:
+                <span style="color: #6DA4CA;">Your Datasets</span>,
+                <span style="color: #FAA051;">Rest Submmited Datasets</span>.""",
+                plot = scatter.plot(data, pconfig)
+            )
 
-    # Plot detailed numbers of performance assessment based on reference datasets
+    ## Plot detailed numbers of performance assessment based on reference datasets
     def detailed_based_on_reference_datasets(self, id, data, title='Detailed numbers of performance assessment based on reference datasets', section_name='Detailed numbers of performance assessment based on reference datasets', description="", helptext=None):
         """ Create the HTML for detailed numbers of performance assessment based on reference datasets """
         headers = OrderedDict()
@@ -479,7 +507,7 @@ class MultiqcModule(BaseMultiqcModule):
         )
     
 
-    # Plot detailed numbers of performance assessment based on Quartet genetic built-in truth
+    ## Plot detailed numbers of performance assessment based on Quartet genetic built-in truth
     def detailed_based_on_quartet_builtin_truth(self, id, data, title='Detailed numbers of performance assessment based on Quartet genetic built-in truth', section_name='Detailed numbers of performance assessment based on Quartet genetic built-in truth', description="", helptext=None):
         """ Create the HTML for detailed numbers of performance assessment based on Quartet genetic built-in truth """
         
