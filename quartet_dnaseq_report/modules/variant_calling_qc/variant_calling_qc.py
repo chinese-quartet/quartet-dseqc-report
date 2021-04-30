@@ -47,11 +47,144 @@ class MultiqcModule(BaseMultiqcModule):
         if len(history_df) == 0:
             log.debug('No file matched: variant_calling_qc - history.txt')
         
+        ## precision_recall (reference_datasets_aver-std.txt)
+        def get_snv_indel_rank(df, typ):
+            history = history_df[history_df.type == typ].f1.to_list()
+            history.sort()
+            query = df[(df.indicator == "F1-score") & (df.type == typ)]["mean"].to_list()[0]
+            rank = len(history) + 1
+            for i in history:
+                if query > i:
+                    rank = rank - 1
+            
+            Rank = "%s/%s" % (rank, len(history) + 1)
+            return(Rank)
+        
+        for f in self.find_log_files('variant_calling_qc/precision_recall'):
+            f_p = '%s/%s' % (f['root'], f['fn'])
+            precision_recall_df = pd.read_csv(f_p, sep=' ', index_col = None, names = ["mean", "sd", "type", "indicator"])
+        # Plot detailed numbers of performance assessment based on reference datasets
+        if len(precision_recall_df) == 0:
+            log.debug('No file matched: variant_calling_qc - reference_datasets_aver-std.txt')
+        else:
+            df = precision_recall_df
+            df["type"] = pd.DataFrame(["SNV", "INDEL", "SNV", "INDEL", "SNV", "INDEL"])
+            df["indicator"] = pd.DataFrame(["Precision", "Precision", "Recall", "Recall", "F1-score", "F1-score"])
+
+            # Get the rank of this batch
+            snv_rank = get_snv_indel_rank(df, "SNV")
+            indel_rank = get_snv_indel_rank(df, "INDEL")
+
+            df["mean"] = df["mean"].round(2)
+            df["sd"] = df["sd"].round(2)
+            df["result"] = df["mean"].astype("string").str.cat(df["sd"].astype("string"), sep = " ± ")
+
+            # F1-score of this batch
+            f1_snv = df[(df.type == "SNV") & (df.indicator == "F1-score")]["mean"].to_list()[0]
+            f1_indel = df[(df.type == "INDEL") & (df.indicator == "F1-score")]["mean"].to_list()[0]
+
+            df = df[["type", "result", "indicator"]]
+            snv_df = df[df["type"] == "SNV"].T
+            snv_df.columns = snv_df.loc["indicator"]
+            snv_df = snv_df.drop(["type", "indicator"], axis = 0)
+            snv_df["Type"] = "SNV"
+            snv_df["Rank"] = snv_rank
+
+            indel_df = df[df["type"] == "INDEL"].T
+            indel_df.columns = indel_df.loc["indicator"]
+            indel_df = indel_df.drop(["type", "indicator"], axis = 0)
+            indel_df["Type"] = "INDEL"
+            indel_df["Rank"] = indel_rank
+
+            df = pd.concat([snv_df, indel_df], axis = 0).reset_index(drop = True)
+
+            # Transfer into the required format
+            precision_recall_summary = []
+            keys = df.columns.tolist()
+            for index in df.index:
+                row = df.loc[index].tolist()
+                precision_recall_summary.append(dict(zip(keys, row)))
+            
+            precision_recall_summary_dic = {}
+            for i in precision_recall_summary:
+                key = i['Type']
+                pop_i = i.pop('Type')
+                precision_recall_summary_dic[key] = i
+            
+            self.assessment_based_on_reference_datasets('precision_recall_summary', precision_recall_summary_dic)
+
+        ## quartet_mendelian (quartet_indel.txt; quartet_snv.txt)
+        def get_mendelian_rank(df, typ):
+            history = history_df[history_df.type == typ].mendelian.to_list()
+            history.sort()
+            query = df[df.Type == typ]["mean"].to_list()[0]
+            rank = len(history) + 1
+            for i in history:
+                if query > i:
+                    rank = rank - 1
+            
+            Rank = "%s/%s" % (rank, len(history) + 1)
+            return(Rank)
+        
+        for f in self.find_log_files('variant_calling_qc/quartet_snv'):
+            f_p = '%s/%s' % (f['root'], f['fn'])
+            quartet_snv_df = pd.read_csv(f_p, sep=' ', index_col = None, names = ["mean", "sd", "Type"])
+        if len(quartet_snv_df) == 0:
+            log.debug('No file matched: variant_calling_qc - quartet_snv_aver-std.txt')
+        else:
+            quartet_snv_df["Type"] = "SNV"
+            quartet_snv_df["Rank"] = get_mendelian_rank(quartet_snv_df, "SNV")
+            quartet_snv_df["mean"] = quartet_snv_df["mean"].round(2)
+            quartet_snv_df["sd"] = quartet_snv_df["sd"].round(2)
+            quartet_snv_df["MCR"] = quartet_snv_df["mean"].astype("string").str.cat(quartet_snv_df["sd"].astype("string"), sep = " ± ")
+
+        for f in self.find_log_files('variant_calling_qc/quartet_indel'):
+            f_p = '%s/%s' % (f['root'], f['fn'])
+            quartet_indel_df = pd.read_csv(f_p, sep=' ', index_col = None, names = ["mean", "sd", "Type"])
+        if len(quartet_indel_df) == 0:
+            log.debug('No file matched: variant_calling_qc - quartet_indel_aver-std.txt')
+        else:
+            quartet_indel_df["Type"] = "INDEL"
+            quartet_indel_df["Rank"] = get_mendelian_rank(quartet_indel_df, "INDEL")
+            quartet_indel_df["mean"] = quartet_indel_df["mean"].round(2)
+            quartet_indel_df["sd"] = quartet_indel_df["sd"].round(2)
+            quartet_indel_df["MCR"] = quartet_indel_df["mean"].astype("string").str.cat(quartet_indel_df["sd"].astype("string"), sep = " ± ")
+        
+        # MCR of this batch
+        mcr_snv = quartet_snv_df["MCR"].to_list()[0]
+        mcr_indel = quartet_indel_df["MCR"].to_list()[0]
+        
+        df = pd.concat([quartet_snv_df, quartet_indel_df], axis = 0).reset_index(drop = True)
+
+        # Plot detailed numbers of performance assessment based on Quartet genetic built-in truth
+        # Transfer into the required format
+        quartet_mendelian_summary = []
+        keys = df.columns.tolist()
+        for index in df.index:
+            row = df.loc[index].tolist()
+            quartet_mendelian_summary.append(dict(zip(keys, row)))
+        
+        quartet_mendelian_summary_dic = {}
+        for i in quartet_mendelian_summary:
+            key = i['Type']
+            pop_i = i.pop('Type')
+            quartet_mendelian_summary_dic[key] = i
+        
+        # Prepare data for scatter plot
+        history_tmp_df = history_df[["mendelian", "f1", "type"]]
+        history_tmp_df.columns = ["Mendelian Concordance Rate", "F1-score", "Type"]
+        history_tmp_df["Batch"] = "Rest Submmited Datasets"
+        # Add the F1-score and MCR info of this batch
+        this_batch = pd.DataFrame([[mcr_snv, f1_snv, "SNV", "Your Datasets"], [mcr_indel, f1_indel, "INDEL", "Your Datasets"]], columns=["Mendelian Concordance Rate", "F1-score", "Type", "Batch"])
+        figure_data = pd.concat([history_tmp_df, this_batch], axis = 0)
+
+        self.assessment_based_on_quartet_builtin_truth('quartet_mendelian_summary', quartet_mendelian_summary_dic, figure_data)
+
         ## snv_indel_summary (variants.calling.qc.txt)
         for f in self.find_log_files('variant_calling_qc/snv_indel_summary'):
             f_p = '%s/%s' % (f['root'], f['fn'])
             snv_indel_df = pd.read_csv(f_p, sep='\t')
-        # Plot the variant calling qc summary table
+        # Plot detailed numbers of performance assessment based on reference datasets
         if len(snv_indel_df) == 0:
             log.debug('No file matched: variant_calling_qc - variants.calling.qc.txt')
         else:
@@ -69,14 +202,14 @@ class MultiqcModule(BaseMultiqcModule):
                 pop_i = i.pop('Sample')
                 snv_indel_summary_dic[key] = i
             
-            self.plot_table_based_on_reference_datasets('snv_indel_summary', snv_indel_summary_dic)
+            self.detailed_based_on_reference_datasets('snv_indel_summary', snv_indel_summary_dic)
 
 
         ## mendelian_summary (mendelian.txt)
         for f in self.find_log_files('variant_calling_qc/mendelian_summary'):
             f_p = '%s/%s' % (f['root'], f['fn'])
             mendelian_df = pd.read_csv(f_p, sep='\t')
-        # Plot the variant calling qc summary table
+        # Plot detailed numbers of performance assessment based on Quartet genetic built-in truth
         if len(mendelian_df) == 0:
             log.debug('No file matched: variant_calling_qc - mendelian.txt')
         else:
@@ -112,10 +245,146 @@ class MultiqcModule(BaseMultiqcModule):
                 pop_i = i.pop('Family')
                 mendelian_summary_dic[key] = i
             
-            self.plot_table_based_on_quartet_builtin_truth('mendelian_summary', mendelian_summary_dic)
+            self.detailed_based_on_quartet_builtin_truth('mendelian_summary', mendelian_summary_dic)
     
+    
+    # Plot functions    
+    ## Assessment based on reference datasets (v202103)
+    def assessment_based_on_reference_datasets(self, id, data, title='Assessment based on reference datasets', section_name='Assessment based on reference datasets', description="The reference dataset version is v202103.", helptext=None):
+        """ Create the HTML for assessment based on reference datasets """
+        
+        headers = OrderedDict()
+        headers['Precision'] = {
+            'title': 'Precision',
+            'description': 'Precision',
+            'scale': False,
+            'format': '{:.0f}'
+        }
+        
+        headers['Recall'] = {
+            'title': 'Recall',
+            'description': 'Recall',
+            'scale': False,
+            'format': '{:.0f}'
+        }
+
+        headers['F1-score'] = {
+            'title': 'F1-score',
+            'description': 'F1-score',
+            'scale': False,
+            'format': '{:.0f}'
+        }
+
+        headers['Rank'] = {
+            'title': 'Rank',
+            'description': 'Rank',
+            'scale': False,
+            'format': '{:.0f}'
+        }
+
+        table_config = {
+            'namespace': 'assessment_based_on_reference_datasets',
+            'id': id,
+            'table_title': 'Assessment based on reference datasets',
+            'col1_header': '',
+            'no_beeswarm': True,
+            'sortRows': False,
+            'format': '{:.0f}',
+            'max_table_rows': 20,
+            'decimalPoint_format': ',',
+            'thousandsSep_format': ","
+        }
+
+        # Add a report section with the table
+        self.add_section(
+            name = section_name if section_name else '',
+            anchor = id + '_anchor',
+            description = description if description else '',
+            plot = table.plot(data, headers, table_config)
+        )
+    
+    ## Assessment based on Quartet family-dependent built-in genetic truth
+    def assessment_based_on_quartet_builtin_truth(self, id, data, figure_data, title='Assessment based on Quartet family-dependent built-in genetic truth', section_name='Assessment based on Quartet family-dependent built-in genetic truth', description="", helptext=None):
+        """ Create the HTML for assessment based on reference datasets """
+        
+        headers = OrderedDict()
+        headers['MCR'] = {
+            'title': 'MCR',
+            'description': 'Mendelian Consistent Rate',
+            'scale': False,
+            'format': '{:.0f}'
+        }
+
+        headers['Rank'] = {
+            'title': 'Rank',
+            'description': 'Rank',
+            'scale': False,
+            'format': '{:.0f}'
+        }
+
+        table_config = {
+            'namespace': 'assessment_based_on_reference_datasets',
+            'id': id,
+            'table_title': 'Assessment based on Quartet family-dependent built-in genetic truth',
+            'col1_header': '',
+            'no_beeswarm': True,
+            'sortRows': False,
+            'format': '{:.0f}',
+            'max_table_rows': 20,
+            'decimalPoint_format': ',',
+            'thousandsSep_format': ","
+        }
+
+        # Add a report section with the table
+        self.add_section(
+            name = section_name if section_name else '',
+            anchor = id + '_anchor',
+            description = description if description else '',
+            plot = table.plot(data, headers, table_config)
+        )
+
+        # Plot figures
+        snv_fig_data = figure_data[figure_data.Type == "SNV"]
+        fig = px.scatter(snv_fig_data, title='SNV', x='F1-score', y='Mendelian Concordance Rate', color='Batch', template='simple_white', hover_data={'F1-score': ':.3f', 'Mendelian Concordance Rate': ':.3f'}, height = 650)
+        #fig.update_layout(legend=dict(orientation='h', yanchor='bottom', y= -0.2, xanchor='center', x = 0.4))
+        html = plotly_plot(fig, {
+            'id': id + '_plot',
+            'data_id': id + '_data',
+            'title': title,
+            'auto_margin': True
+        })
+    
+        # Add a report section with the scatter plot
+        self.add_section(
+            name = '',
+            anchor = id + '_anchor2',
+            description = '',
+            helptext = '',
+            plot = html
+        )
+
+        indel_fig_data = figure_data[figure_data.Type == "INDEL"]
+        fig = px.scatter(indel_fig_data, title='INDEL', x='F1-score', y='Mendelian Concordance Rate', color='Batch', template='simple_white', hover_data={'F1-score': ':.3f', 'Mendelian Concordance Rate': ':.3f'}, height = 650)
+        #fig.update_layout(legend=dict(orientation='h', yanchor='bottom', y= -0.2, xanchor='center', x = 0.4))
+
+        html = plotly_plot(fig, {
+            'id': id + '_plot',
+            'data_id': id + '_data',
+            'title': title,
+            'auto_margin': True
+        })
+    
+        # Add a report section with the scatter plot
+        self.add_section(
+            name = '',
+            anchor = id + '_anchor2',
+            description = '',
+            helptext = '',
+            plot = html
+        )
+
     # Plot detailed numbers of performance assessment based on reference datasets
-    def plot_table_based_on_reference_datasets(self, id, data, title='Detailed numbers of performance assessment based on reference datasets', section_name='Detailed numbers of performance assessment based on reference datasets', description="Detailed numbers of performance assessment based on reference datasets.", helptext=None):
+    def detailed_based_on_reference_datasets(self, id, data, title='Detailed numbers of performance assessment based on reference datasets', section_name='Detailed numbers of performance assessment based on reference datasets', description="", helptext=None):
         """ Create the HTML for detailed numbers of performance assessment based on reference datasets """
         headers = OrderedDict()
         headers['SNV number'] = {
@@ -203,7 +472,7 @@ class MultiqcModule(BaseMultiqcModule):
 
         # Add a report section with the table
         self.add_section(
-            name = section_name if section_name else 'Detailed numbers of performance assessment based on reference datasets',
+            name = section_name if section_name else '',
             anchor = id + '_anchor',
             description = description if description else '',
             plot = table.plot(data, headers, table_config)
@@ -211,7 +480,7 @@ class MultiqcModule(BaseMultiqcModule):
     
 
     # Plot detailed numbers of performance assessment based on Quartet genetic built-in truth
-    def plot_table_based_on_quartet_builtin_truth(self, id, data, title='Detailed numbers of performance assessment based on Quartet genetic built-in truth', section_name='Detailed numbers of performance assessment based on Quartet genetic built-in truth', description="Detailed numbers of performance assessment based on Quartet genetic built-in truth.", helptext=None):
+    def detailed_based_on_quartet_builtin_truth(self, id, data, title='Detailed numbers of performance assessment based on Quartet genetic built-in truth', section_name='Detailed numbers of performance assessment based on Quartet genetic built-in truth', description="", helptext=None):
         """ Create the HTML for detailed numbers of performance assessment based on Quartet genetic built-in truth """
         
         headers = OrderedDict()
@@ -252,206 +521,8 @@ class MultiqcModule(BaseMultiqcModule):
 
         # Add a report section with the table
         self.add_section(
-            name = section_name if section_name else 'Detailed numbers of performance assessment based on Quartet genetic built-in truth',
+            name = section_name if section_name else '',
             anchor = id + '_anchor',
             description = description if description else '',
             plot = table.plot(data, headers, table_config)
-        )
-    
-
-    # Create table dic for html
-    def creat_table(self, list1, list2, indicator, var_type, library):
-        table_dic = OrderedDict()
-        table_dic[var_type] = {indicator[0]: list1[0], indicator[1]: list2[0]}
-        table_dic['All Rank'] = {indicator[0]: list1[1], indicator[1]: list2[1]}
-        table_dic['%s Rank' % library] = {indicator[0]: list1[2], indicator[1]: list2[2]}
-        return(table_dic)
-    
-    # Write table into file
-    def write_data_file(self, data, fn, sort_cols=False, data_format=None):
-
-        # Add relevant file extension to filename
-        fn = '{}.{}'.format(fn, data_format)
-
-        # JSON encoder class to handle lambda functions
-        class MQCJSONEncoder(json.JSONEncoder):
-            def default(self, obj):
-                if callable(obj):
-                    try:
-                        return obj(1)
-                    except:
-                        return None
-                return json.JSONEncoder.default(self, obj)
-
-        # Save file
-        with io.open (os.path.join(config.data_dir, fn), 'w', encoding='utf-8') as f:
-            if data_format == 'json':
-                jsonstr = json.dumps(data, indent=4, cls=MQCJSONEncoder, ensure_ascii=False)
-                print( jsonstr.encode('utf-8', 'ignore').decode('utf-8'), file=f)
-            elif data_format == 'yaml':
-                yaml.dump(data, f, default_flow_style=False)
-            else:
-                # Default - tab separated output
-                # Convert keys to strings
-                data = {str(k):v for k, v in data.items()}
-                # Get all headers
-                h = ['']
-                for sn in data.keys():
-                    for k in data[sn].keys():
-                        if type(data[sn][k]) is not dict and k not in h:
-                            h.append(str(k))
-                if sort_cols:
-                    h = sorted(h)
-
-                # Get the rows
-                rows = [ "\t".join(h) ]
-                for sn in sorted(data.keys()):
-                    # Make a list starting with the sample name, then each field in order of the header cols
-                    l = [str(sn)] + [ str(data[sn].get(k, '')) for k in h[1:] ]
-                    rows.append( "\t".join(l) )
-
-                body = '\n'.join(rows)
-
-                print( body.encode('utf-8', 'ignore').decode('utf-8'), file=f)
-    
-    # Plot SNV based on reference datasets table and scatter plot
-    def plot_snv_reference_datasets(self, id, fig_data, table_data, title='SNV performance based on reference datasets', section_name='SNV performance based on reference datasets', description=None, helptext=None):
-        """ Create the HTML for SNV performance table based on reference datasets """
-        
-        headers = OrderedDict()
-        headers['Precision (%)'] = {
-            'title': '% Precision',
-            'description': '% Precision',
-            'max': 100,
-            'min': 0,
-            'scale': 'RdYlGn',
-            'format': '{:.2f}'
-        }
-
-        headers['Recall (%)'] = {
-            'title': '% Recall',
-            'description': '% Recall',
-            'max': 100,
-            'min': 0,
-            'scale': 'RdYlGn',
-            'format': '{:.2f}'
-        }
-
-        table_config = {
-            'namespace': 'precison_recall_snv',
-            'id': id,
-            'table_title': 'SNV performance based on Quartet family-dependent built-in genetic truth',
-            'col1_header': '',
-            'no_beeswarm': True,
-            'sortRows': False,
-            'save_file': False
-        }
-
-        # Add a report section with the table
-        self.add_section(
-            name = section_name if section_name else 'SNV performance based on reference datasets',
-            anchor = id + '_anchor',
-            description = description if description else '',
-            helptext = helptext if helptext else '''
-            This longer description explains what exactly the numbers mean
-            and supports markdown formatting. This means that we can do _this_:
-
-            * Something important
-            * Something else important
-            * Best of all - some `code`
-
-            Doesn't matter if this is copied from documentation - makes it
-            easier for people to find quickly.
-            ''',
-            plot = table.plot(table_data, headers, table_config)
-        )
-
-        fig = px.scatter(fig_data, title='SNV performance based on reference datasets', x='Recall', y='Precision', color='Batch', template='simple_white', hover_data={'Recall': ':.3f', 'Precision': ':.3f'}, height = 650)
-        #fig.update_layout(legend=dict(orientation='h', yanchor='bottom', y= -0.2, xanchor='center', x = 0.4))
-
-        html = plotly_plot(fig, {
-            'id': id + '_plot',
-            'data_id': id + '_data',
-            'title': title,
-            'auto_margin': True
-        })
-    
-        # Add a report section with the scatter plot
-        self.add_section(
-            name = '',
-            anchor = id + '_anchor2',
-            description = '',
-            helptext = '',
-            plot = html
-        )
-
-    # Plot INDEL based on reference datasets table and scatter plot
-    def plot_indel_reference_datasets(self, id, fig_data, table_data, title='INDEL performance based on reference datasets', section_name='INDEL performance based on reference datasets', description=None, helptext=None):
-        """ Create the HTML for INDEL performance table based on reference datasets """
-        
-        headers = OrderedDict()
-        headers['Precision (%)'] = {
-            'title': '% Precision',
-            'description': '% Precision',
-            'max': 100,
-            'min': 0,
-            'scale': 'RdYlGn',
-            'format': '{:.2f}'
-        }
-
-        headers['Recall (%)'] = {
-            'title': '% Recall',
-            'description': '% Recall',
-            'max': 100,
-            'min': 0,
-            'scale': 'RdYlGn',
-            'format': '{:.2f}'
-        }
-
-        table_config = {
-            'namespace': 'precison_recall_indel',
-            'id': id,
-            'table_title': 'INDEL performance based on Quartet family-dependent built-in genetic truth',
-            'col1_header': '',
-            'no_beeswarm': True,
-            'sortRows': False,
-            'save_file': False
-        }
-
-        # Add a report section with the table
-        self.add_section(
-            name = section_name if section_name else 'INDEL performance based on reference datasets',
-            anchor = id + '_anchor',
-            description = description if description else '',
-            helptext = helptext if helptext else '''
-            This longer description explains what exactly the numbers mean
-            and supports markdown formatting. This means that we can do _this_:
-
-            * Something important
-            * Something else important
-            * Best of all - some `code`
-
-            Doesn't matter if this is copied from documentation - makes it
-            easier for people to find quickly.
-            ''',
-            plot = table.plot(table_data, headers, table_config)
-        )
-
-        fig = px.scatter(fig_data, title='INDEL performance based on reference datasets', x='Recall', y='Precision', color='Batch', template='simple_white', hover_data={'Recall': ':.3f', 'Precision': ':.3f'}, height = 650)
-        #width=800, height=800
-
-        html = plotly_plot(fig, {
-            'id': id + '_plot',
-            'data_id': id + '_data',
-            'title': title,
-            'auto_margin': True
-        })
-    
-        # Add a report section with the scatter plot
-        self.add_section(
-            name = '',
-            anchor = id + '_anchor2',
-            description = '',
-            helptext = '',
-            plot = html
         )

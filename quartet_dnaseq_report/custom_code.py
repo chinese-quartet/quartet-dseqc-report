@@ -94,7 +94,7 @@ def quartet_dnaseq_report_execution_start():
         config.update_dict( config.sp, { 'variant_calling_qc/quartet_snv': { 'fn_re': '^quartet_snv_aver-std.txt$' } } )
     
     if 'variant_calling_qc/history' not in config.sp:
-        config.update_dict( config.sp, { 'variant_calling_qc/history': { 'fn_re': '^precision_recall_snv.txt$' } } )
+        config.update_dict( config.sp, { 'variant_calling_qc/history': { 'fn_re': '^history.txt$' } } )
     
     
     # # Some additional filename cleaning
