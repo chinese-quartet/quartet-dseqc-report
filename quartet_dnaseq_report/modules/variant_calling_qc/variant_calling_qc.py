@@ -18,7 +18,6 @@ import plotly.figure_factory as ff
 from multiqc import config
 from multiqc.plots import table, linegraph, scatter
 from multiqc.modules.base_module import BaseMultiqcModule
-from quartet_dnaseq_report.modules.plotly import plot as plotly_plot
 
 # Initialise the main MultiQC logger
 log = logging.getLogger('multiqc')
