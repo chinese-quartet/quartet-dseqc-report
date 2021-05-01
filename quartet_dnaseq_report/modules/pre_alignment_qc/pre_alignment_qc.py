@@ -18,7 +18,6 @@ from multiqc import config
 from multiqc.plots import table, linegraph
 from multiqc.modules.base_module import BaseMultiqcModule
 from multiqc.utils import report
-from quartet_dnaseq_report.modules.plotly import plot as plotly_plot
 
 # Initialise the main MultiQC logger
 log = logging.getLogger('multiqc')
@@ -33,9 +32,9 @@ class MultiqcModule(BaseMultiqcModule):
         # Initialise the parent module Class object
         super(MultiqcModule, self).__init__(
             name='Pre-alignment Quality Control',
-            target='pre_alignment_qc',
-            anchor='pre_alignment_qc',
-            href='https://github.com/clinico-omics/quartet-dnaseq-report',
+            target='Pre-alignment QC',
+            #anchor='pre_alignment_qc',
+            #href='https://github.com/clinico-omics/quartet-dnaseq-report',
             info=' is an report module to show the data quality before alignment.'
         )
 
@@ -201,7 +200,7 @@ class MultiqcModule(BaseMultiqcModule):
             colours[s_name] = self.status_colours[status]
         return colours
     
-    def plot_summary_table(self, id, data, title='Table summary', section_name='Table summary', description=None, helptext=None):
+    def plot_summary_table(self, id, data, title='Summary metrics', section_name='Summary metrics', description=None, helptext=None):
         """ Create the HTML for pre-alignment qc summary """
 
         headers = OrderedDict()
@@ -332,7 +331,7 @@ class MultiqcModule(BaseMultiqcModule):
 
         # Add a report section with the table
         self.add_section(
-            name = section_name if section_name else 'Table summary',
+            name = section_name if section_name else 'Summary metrics',
             anchor = id + '_anchor',
             description = description if description else '',
             helptext = helptext if helptext else '''

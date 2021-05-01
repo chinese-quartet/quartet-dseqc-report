@@ -27,10 +27,10 @@ class MultiqcModule(BaseMultiqcModule):
         # Initialise the parent module Class object
         super(MultiqcModule, self).__init__(
             name='Supplementary',
-            target='supplementary',
-            anchor='supplementary',
-            href='https://github.com/clinico-omics/quartet-dnaseq-report',
-            info=' is a module to show the additional information about this quality assessment report.'
+            target='The additional information',
+            #anchor='supplementary',
+            #href='https://github.com/clinico-omics/quartet-dnaseq-report',
+            info=' about this quality assessment report.'
         )
         
         html = '''
@@ -45,9 +45,13 @@ class MultiqcModule(BaseMultiqcModule):
                     <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=AM_HTMLorMML-full"></script>
                     <body>
                         <div class="formula">
-                            <span>Precision=TP/TP+FP</span>
-                            <span>Recall=TP/TP+FN</span>
-                            <span>F1=2×Precision×Recall/Precision+Recall</span>
+                            <span>Precision=TP/(TP+FP)</span>
+                            </p>
+                            <p>
+                            <span>Recall=TP/(TP+FN)</span>
+                            </p>
+                            <p>
+                            <span>F1=(2×Precision×Recall)/(Precision+Recall)</span>
                         </div>
                     </body>
                     </p>                  
@@ -64,7 +68,7 @@ class MultiqcModule(BaseMultiqcModule):
                     <p>
                         We accepted fastq files, and used Sentieon Genomics to call germline small variants. [<a class='reference' href='#ref-1'>1</a>] The quality control consists of pre-alignment, post-alignment and variants calling quality control. Pre-alignment quality control focuses on raw fastq files and helps to determine systematic bias and library issue, such as sequencing quality issue, high GC or AT, PCR bias, adapter contaminant, cross species contamination. FastQC [<a class='reference' href='#ref-2'>2</a>] and FastQ Screen [<a class='reference' href='#ref-3'>3</a>] are used to evaluate raw reads quality. Post-alignment quality control focuses on bam files and helps to measure library performance and sample variance, such as sequencing error rate, sequencing depth and coverage consistency. Qualimap [<a class='reference' href='#ref-4'>4</a>] is used to evaluate quality of bam files. Variants calling quality control is to examine accuracy of detected variants based on reference datasets, and estimate potential sequence errors by reproducibility of monozygotic twin daughters and mendelian concordant ratio of Quartet family.
                     </p>
-                    <img src="data:image/png;base64,{image}" title='quartet-dna-pipeline' width='70%' height='70%'/>
+                    <img src="data:image/png;base64,{image}" title='quartet-dna-pipeline' width='100%' height='100%'/>
                 </div>
             </div>
 
@@ -95,9 +99,9 @@ class MultiqcModule(BaseMultiqcModule):
             <!-- Contact us -->
             <div class='contact'>
                 <div class='small-12 columns'>
-                <h3 class='section-header black'>Contact Us</h3>
+                <h3 class='section-header black'>Contact us</h3>
                 <b>Fudan University Pharmacogenomics Research Center</b>
-                <p><strong>Project Manager Ren Luyao</strong></p>
+                <li style='margin-top:1ex'>Project manager: Ren Luyao</li>
                 <li style='margin-top:1ex'>Phone: 15200852771</li>
                 <li style='margin-top:1ex'>Email: 18110700050@fudan.edu.cn</li>
                 </div>

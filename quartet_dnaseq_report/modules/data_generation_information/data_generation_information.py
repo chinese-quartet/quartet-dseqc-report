@@ -12,14 +12,13 @@ import plotly.figure_factory as ff
 
 from multiqc import config
 from multiqc.modules.base_module import BaseMultiqcModule
-from quartet_dnaseq_report.modules.plotly import plot as plotly_plot
 
 # Initialise the main MultiQC logger
 log = logging.getLogger('multiqc')
 
 class MultiqcModule(BaseMultiqcModule):
     def __init__(self):
-        
+
         # Halt execution if we've disabled the plugin
         if config.kwargs.get('disable_plugin', True):
             return None
@@ -27,10 +26,10 @@ class MultiqcModule(BaseMultiqcModule):
         # Initialise the parent module Class object
         super(MultiqcModule, self).__init__(
             name='Data Generation Information',
-            target='data_generation_information',
-            anchor='data_generation_information',
-            href='https://github.com/clinico-omics/quartet-dnaseq-report',
-            info=' is an report module to show the basic information about the sequencing data.'
+            target='The basic information',
+            #anchor='data_generation_information',
+            #href='https://github.com/clinico-omics/quartet-dnaseq-report',
+            info=' about the sequencing data.'
         )
 
         # Find and load any input files for data_generation_information
