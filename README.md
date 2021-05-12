@@ -24,7 +24,7 @@ cd quartet-dnaseq-report
 python setup.py install
 ```
 
-**The input files for the MultiReport is the output result of Quartet DNA-Seq pipeline**
+**The input files for the MultiReport is the output result of Quartet DNA-Seq pipeline:**
 - call-fastqc
 - call-fastqscreen
 - call-qualimap
@@ -41,12 +41,14 @@ multiqc ./results/
 multiqc ./results/ --disable-plugin
 ```
 
+**When you run the plugin, please in the quartet-dnaseq-report directory.**
 ## Development
 If you're developing this code, you'll want to clone it locally and install
 it manually instead of using `pip`:
 
-```
+```shell
 git clone https://github.com/clinico-omics/quartet-dnaseq-report.git
 cd quartet-dnaseq-report
+# You don't need to rerun the installation every time you make an edit (though you still do if you change anything in setup.py).
 python setup.py develop
 ```
