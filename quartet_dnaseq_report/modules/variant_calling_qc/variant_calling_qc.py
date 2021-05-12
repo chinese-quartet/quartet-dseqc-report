@@ -5,18 +5,12 @@
 from __future__ import print_function
 from collections import OrderedDict
 from io import StringIO
-import json
 import logging
-import re
-import zipfile
+import os
 import pandas as pd
-import numpy as np
-import plotly.graph_objs as go
-import plotly.express as px
-import plotly.figure_factory as ff
 
 from multiqc import config
-from multiqc.plots import table, linegraph, scatter
+from multiqc.plots import table, scatter
 from multiqc.modules.base_module import BaseMultiqcModule
 
 # Initialise the main MultiQC logger
@@ -39,12 +33,11 @@ class MultiqcModule(BaseMultiqcModule):
         )
 
         # Find and load input files
-        ## historical batches' performance     
-        for f in self.find_log_files('variant_calling_qc/history'):
-            f_p = '%s/%s' % (f['root'], f['fn'])
-            history_df = pd.read_csv(f_p, sep='\t')
+        ## historical batches' performance
+        f_p = './quartet_dnaseq_report/modules/variant_calling_qc/reference_datasets/history.txt'
+        history_df = pd.read_csv(f_p, sep='\t')
         if len(history_df) == 0:
-            log.debug('No file matched: variant_calling_qc - history.txt')
+            log.debug('No file matched: variant_calling_qc/reference_datasets - history.txt')
         
         ## precision_recall (reference_datasets_aver-std.txt)
         for f in self.find_log_files('variant_calling_qc/precision_recall'):

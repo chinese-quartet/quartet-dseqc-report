@@ -28,8 +28,8 @@ class MultiqcModule(BaseMultiqcModule):
     def __init__(self):
                 
         # Halt execution if we've disabled the plugin
-        #if config.kwargs.get('disable_plugin', True):
-        #    return None
+        if config.kwargs.get('disable_plugin', True):
+            return None
         
         # Initialise the parent module Class object
         super(MultiqcModule, self).__init__(
