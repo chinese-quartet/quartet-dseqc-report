@@ -93,6 +93,8 @@ def quartet_dnaseq_report_execution_start():
     if 'variant_calling_qc/quartet_snv' not in config.sp:
         config.update_dict( config.sp, { 'variant_calling_qc/quartet_snv': { 'fn_re': '^quartet_snv_aver-std.txt$' } } )
     
-    config.module_order = ['data_generation_information', 'performance_assessment', 'pre_alignment_qc', 'post_alignment_qc', 'variant_calling_qc', 'supplementary']
+    config.module_order = ['data_generation_information', 'pre_alignment_qc', 'post_alignment_qc', 'variant_calling_qc', 'supplementary']
 
+    config.exclude_modules = ['fastqc', 'fastq_screen', 'qualimap']
+    
     config.log_filesize_limit = 2000000000
