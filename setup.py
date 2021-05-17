@@ -5,7 +5,7 @@ MultiReport for Quartet DNAseq QC
 
 from setuptools import setup, find_packages
 
-version = '0.1.2'
+version = '0.1.3'
 
 setup(
     name = 'quartet_dnaseq_report',
