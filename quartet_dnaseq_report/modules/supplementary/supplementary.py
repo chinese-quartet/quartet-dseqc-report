@@ -45,13 +45,7 @@ class MultiqcModule(BaseMultiqcModule):
                     <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=AM_HTMLorMML-full"></script>
                     <body>
                         <div class="formula">
-                            <span>Precision=TP/(TP+FP)</span>
-                            </p>
-                            <p>
-                            <span>Recall=TP/(TP+FN)</span>
-                            </p>
-                            <p>
-                            <span>F1=(2×Precision×Recall)/(Precision+Recall)</span>
+                            <span>Precision=TP/(TP+FP), Recall=TP/(TP+FN), F1=(2×Precision×Recall)/(Precision+Recall)</span>
                         </div>
                     </body>
                     </p>                  
