@@ -29,7 +29,7 @@ python setup.py install
 - call-fastqscreen
 - call-qualimap
 - call-extract_tables
-- call-quartet_mendelian
+- call-merge_mendelian
 
 Then, you can get the QC report by the following actions:
 
