@@ -45,7 +45,7 @@ class MultiqcModule(BaseMultiqcModule):
       if f is None:
         log.debug('No file matched: variant_calling_qc - variants.calling.qc.txt')
       else:
-        f_p = '%s/%s' % (f['root'], f['fn'])
+        f_p = '/%s/%s' % (f['root'], f['fn'])
         tmp_df = pd.read_csv(f_p, sep='\t')
         tmp_df[['SNV precision', 'INDEL precision', 'SNV recall', 'INDEL recall']] = round(tmp_df[['SNV precision', 'INDEL precision', 'SNV recall', 'INDEL recall']]/100, 2)
         snv_indel_df = pd.concat([snv_indel_df, tmp_df], axis=0)
@@ -85,7 +85,8 @@ class MultiqcModule(BaseMultiqcModule):
       if f is None:
         log.debug('No file matched: variant_calling_qc - project.summary.txt')
       else:
-        f_p = '%s/%s' % (f['root'].strip('/'), f['fn'])
+        f_p = '/%s/%s' % (f['root'].strip('/'), f['fn'])
+        print(f_p)
         tmp_df = pd.read_csv(f_p, sep='\t')
         tmp_df.Family = 'Family %i.' % n + tmp_df.Family
         mendelian_df = pd.concat([mendelian_df, tmp_df], axis=0)
