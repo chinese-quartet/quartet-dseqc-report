@@ -23,7 +23,7 @@ setup(
     install_requires = [
         'multiqc==1.9',
         'plotly==4.9.0',
-        'pandas==1.1.0'
+        # 'pandas==1.1.0'
     ],
     entry_points = {
         'multiqc.modules.v1': [
