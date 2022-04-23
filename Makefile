@@ -6,7 +6,7 @@ all: clean install-report
 clean:
 	@echo "Clean the environment..."
 	@bin/lein clean
-	@rm -rf .env .lsp .clj-kondo report/dist report/quartet-proteome-report.egg-info exp2qcdt.tar.gz resources/renv/library resources/renv/staging
+	@rm -rf .env .lsp .clj-kondo report/dist report/quartet_dnaseq_report.egg-info
 
 make-env:
 	virtualenv -p python3 .env

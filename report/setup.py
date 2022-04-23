@@ -3,7 +3,18 @@
 MultiReport for Quartet DNAseq QC
 """
 
+import pathlib
+import pkg_resources
 from setuptools import setup, find_packages
+
+def get_requirements():
+    with pathlib.Path('requirements.txt').open() as requirements_txt:
+        install_requires = [
+            str(requirement)
+            for requirement
+            in pkg_resources.parse_requirements(requirements_txt)
+        ]
+        return install_requires
 
 version = '0.1.4'
 
@@ -20,11 +31,7 @@ setup(
     license = 'MIT',
     packages = find_packages(),
     include_package_data = True,
-    install_requires = [
-        'multiqc==1.9',
-        'plotly==4.9.0',
-        # 'pandas==1.1.0'
-    ],
+    install_requires = get_requirements(),
     entry_points = {
         'multiqc.modules.v1': [
             'data_generation_information = quartet_dnaseq_report.modules.data_generation_information:MultiqcModule',

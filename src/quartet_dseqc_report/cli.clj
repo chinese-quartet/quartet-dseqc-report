@@ -56,7 +56,7 @@
       (nil? (:output options))
       {:exit-message "You need to specified -o/--output argument."}
 
-      (and (:data options) (:metadata options) (:name options) (:output options))
+      (and (:data options) (:name options) (:output options))
       {:options options}
 
       :else ; failed custom validation => exit with usage summary

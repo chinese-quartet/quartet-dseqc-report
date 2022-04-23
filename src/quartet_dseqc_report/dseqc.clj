@@ -100,12 +100,11 @@
 (defn gen-multiqc-config
   [config-file]
   (let [config (yaml/generate-string
-                {:run_modules ["dnaseq_data_generation_information"
-                               "dnaseq_performance_assessment"
-                               "dnaseq_raw_qc"
-                               "dnaseq_post_alignment_qc"
-                               "dnaseq_quantification_qc"
-                               "dnaseq_supplementary"]
+                {:run_modules ["data_generation_information"
+                               "pre_alignment_qc"
+                               "variant_calling_qc"
+                               "post_alignment_qc"
+                               "supplementary"]
                  :skip_generalstats true}
                 :dumper-options {:flow-style :block})]
     (spit config-file config)))

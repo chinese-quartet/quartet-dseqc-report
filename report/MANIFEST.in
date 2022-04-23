@@ -1,4 +1,4 @@
-include Makefile CHANGES.rst CONTRIBUTING.rst LICENSE AUTHORS config.py LICENSE.md
+include Makefile CHANGES.rst CONTRIBUTING.rst LICENSE AUTHORS config.py LICENSE.md requirements.txt
 
 recursive-include quartet_dnaseq_report *
 
