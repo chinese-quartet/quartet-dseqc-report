@@ -206,10 +206,21 @@
         (fs-lib/copy file-path dest options)
         (fs-lib/copy-recursively file-path dest options)))))
 
+(defn rand-str [n]
+  (clojure.string/join
+   (repeatedly n #(rand-nth "abcdefghijklmnopqrstuvwxyz0123456789"))))
+
 (defn copy-local-file!
   [file-path dest-dir options]
   (let [file (io/file file-path)
-        dest (fs-lib/join-paths dest-dir (fs-lib/base-name file-path))]
+        basename (fs-lib/base-name file-path)
+        dest (fs-lib/join-paths dest-dir basename)
+        corrected-dest (fs-lib/join-paths dest-dir (str (rand-str 4) "-" basename))
+        ;; When the file does't exist or be allowed to replace existing, use the original dest.
+        dest (if (or (not (fs-lib/exists? dest))
+                     (:replace-existing options))
+               dest
+               corrected-dest)]
     (if (.isFile file)
       (fs-lib/copy file-path dest options)
       (fs-lib/copy-recursively file-path dest options))))
@@ -232,14 +243,21 @@
   [file-path dest-dir options]
   ;; TODO: Any options can help to improve the action.
   (let [is-dir? (re-matches #".*\/" file-path)
-        filename (basename file-path)
+        basename (fs-lib/base-name file-path)
+        dest (fs-lib/join-paths dest-dir basename)
+        corrected-dest (fs-lib/join-paths dest-dir (str (rand-str 4) "-" basename))
+        ;; When the file does't exist or be allowed to replace existing, use the original dest.
+        dest (if (or (not (fs-lib/exists? dest))
+                     (:replace-existing options))
+               dest
+               corrected-dest)
         {:keys [protocol bucket prefix]} (parse-path file-path)]
     (if is-dir?
       (let [dest-dir (fs-lib/join-paths dest-dir (dirname file-path))]
         (fs-lib/create-directory dest-dir)
         (map #(copy-remote-file! % dest-dir options)
              (list-files file-path)))
-      (remote-fs/with-conn protocol (remote-fs/download-object bucket prefix (fs-lib/join-paths dest-dir filename))))))
+      (remote-fs/with-conn protocol (remote-fs/download-object bucket prefix dest)))))
 
 (defn copy-files!
   ":replace-existing, :copy-attributes, :nofollow-links"
