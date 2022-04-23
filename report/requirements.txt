@@ -17,7 +17,7 @@ matplotlib==3.3.1
 multiqc==1.9
 networkx==2.4
 numpy==1.19.1
-pandas==1.1.0
+pandas==1.2.4
 Pillow==7.2.0
 plotly==4.9.0
 pyparsing==2.4.7
@@ -30,4 +30,5 @@ simplejson==3.17.2
 six==1.15.0
 spectra==0.0.11
 urllib3==1.25.10
-seaborn==0.10.0
+seaborn==0.11.2
+Cython==0.29.28

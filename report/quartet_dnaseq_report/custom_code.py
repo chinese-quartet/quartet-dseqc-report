@@ -30,7 +30,7 @@ def quartet_dnaseq_report_execution_start():
     # Halt execution if we've disabled the plugin
     if config.kwargs.get('disable_plugin', True):
         return None
-
+    
     log.info('Running Quartet DNA MultiQC Plugin v{}'.format(config.quartet_dnaseq_report_version))
 
     # Add to the main MultiQC config object.
@@ -45,47 +45,47 @@ def quartet_dnaseq_report_execution_start():
 
     # Module-pre_alignment_qc
     if 'pre_alignment_qc/summary' not in config.sp:
-        config.update_dict( config.sp, { 'pre_alignment_qc/summary': { 'fn_re': r'^pre_alignment.txt$' } } )
+        config.update_dict( config.sp, { 'pre_alignment_qc/summary': { 'fn_re': r'pre_alignment.txt$' } } )
 
     if 'pre_alignment_qc/fastqc_data' not in config.sp:
-        config.update_dict( config.sp, { 'pre_alignment_qc/fastqc_data': { 'fn_re': r'fastqc_data.txt' } } )
+        config.update_dict( config.sp, { 'pre_alignment_qc/fastqc_data': { 'fn_re': r'fastqc_data.txt$' } } )
 
     if 'pre_alignment_qc/fastqc_zip' not in config.sp:
         config.update_dict( config.sp, { 'pre_alignment_qc/fastqc_zip': { 'fn_re': r'.*_fastqc.zip' } } )
 
     if 'pre_alignment_qc/fastqc_theoretical_gc' not in config.sp:
-        config.update_dict( config.sp, { 'pre_alignment_qc/fastqc_theoretical_gc': { 'fn_re': r'^fastqc_theoretical_gc_hg38_genome.txt$' } } )
+        config.update_dict( config.sp, { 'pre_alignment_qc/fastqc_theoretical_gc': { 'fn_re': r'fastqc_theoretical_gc_hg38_genome.txt$' } } )
     
 
     # Module-post_alignment_qc
     if 'post_alignment_qc/summary' not in config.sp:
-        config.update_dict( config.sp, { 'post_alignment_qc/summary': { 'fn_re': r'^post_alignment.txt$' } } )
+        config.update_dict( config.sp, { 'post_alignment_qc/summary': { 'fn_re': r'post_alignment.txt$' } } )
 
     if 'post_alignment_qc/bamqc/genome_results' not in config.sp:
         config.update_dict( config.sp, { 'post_alignment_qc/bamqc/genome_results': { 'fn_re': r'^genome_results.txt$' } } )
 
     if 'post_alignment_qc/bamqc/coverage' not in config.sp:
-        config.update_dict( config.sp, { 'post_alignment_qc/bamqc/coverage': { 'fn_re': r'^coverage_histogram.txt$' } } )
+        config.update_dict( config.sp, { 'post_alignment_qc/bamqc/coverage': { 'fn_re': r'coverage_histogram.txt$' } } )
 
     if 'post_alignment_qc/bamqc/insert_size' not in config.sp:
-        config.update_dict( config.sp, { 'post_alignment_qc/bamqc/insert_size': { 'fn_re': r'^insert_size_histogram.txt$' } } )
+        config.update_dict( config.sp, { 'post_alignment_qc/bamqc/insert_size': { 'fn_re': r'insert_size_histogram.txt$' } } )
 
     if 'post_alignment_qc/bamqc/genome_fraction' not in config.sp:
-        config.update_dict( config.sp, { 'post_alignment_qc/bamqc/genome_fraction': { 'fn_re': r'^genome_fraction_coverage.txt$' } } )
+        config.update_dict( config.sp, { 'post_alignment_qc/bamqc/genome_fraction': { 'fn_re': r'genome_fraction_coverage.txt$' } } )
 
     if 'post_alignment_qc/bamqc/gc_dist' not in config.sp:
-        config.update_dict( config.sp, { 'post_alignment_qc/bamqc/gc_dist': { 'fn_re': r'^mapped_reads_gc-content_distribution.txt$' } } )
+        config.update_dict( config.sp, { 'post_alignment_qc/bamqc/gc_dist': { 'fn_re': r'mapped_reads_gc-content_distribution.txt$' } } )
     
 
     # Module-variant_calling_qc
     if 'variant_calling_qc/snv_indel_summary' not in config.sp:
-        config.update_dict( config.sp, { 'variant_calling_qc/snv_indel_summary': { 'fn_re': r'^variants.calling.qc.txt$' } } )
+        config.update_dict( config.sp, { 'variant_calling_qc/snv_indel_summary': { 'fn_re': r'variants.calling.qc.txt$' } } )
     
     if 'variant_calling_qc/mendelian_summary' not in config.sp:
-        config.update_dict( config.sp, { 'variant_calling_qc/mendelian_summary': { 'fn_re': r'.*summary.txt$' } } )
+        config.update_dict( config.sp, { 'variant_calling_qc/mendelian_summary': { 'fn_re': r'.*\.summary.txt$' } } )
     
     if 'variant_calling_qc/history' not in config.sp:
-        config.update_dict( config.sp, { 'variant_calling_qc/history': { 'fn_re': r'^history.txt$' } } )
+        config.update_dict( config.sp, { 'variant_calling_qc/history': { 'fn_re': r'history.txt$' } } )
     
     config.module_order = ['data_generation_information', 'pre_alignment_qc', 'post_alignment_qc', 'variant_calling_qc', 'supplementary']
 

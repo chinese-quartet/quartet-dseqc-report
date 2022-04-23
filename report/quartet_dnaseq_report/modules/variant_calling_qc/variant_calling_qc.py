@@ -40,12 +40,11 @@ class MultiqcModule(BaseMultiqcModule):
       log.debug('No file matched: variant_calling_qc/reference_datasets - history.txt')
     
     ### SUMMARY TABLE 1
-    snv_indel_df = pd.DataFrame(); #i=0
+    snv_indel_df = pd.DataFrame()
     for f in self.find_log_files('variant_calling_qc/snv_indel_summary'):
       if f is None:
         log.debug('No file matched: variant_calling_qc - variants.calling.qc.txt')
       else:
-        #i = i+1
         f_p = '%s/%s' % (f['root'], f['fn'])
         tmp_df = pd.read_csv(f_p, sep='\t')
         tmp_df[['SNV precision', 'INDEL precision', 'SNV recall', 'INDEL recall']] = round(tmp_df[['SNV precision', 'INDEL precision', 'SNV recall', 'INDEL recall']]/100, 2)
@@ -81,26 +80,28 @@ class MultiqcModule(BaseMultiqcModule):
 
     ### SUMMARY TABLE 2
     mendelian_df = pd.DataFrame()
+    n = 1
     for f in self.find_log_files('variant_calling_qc/mendelian_summary'):
       if f is None:
         log.debug('No file matched: variant_calling_qc - project.summary.txt')
       else:
-        f_p = '%s/%s' % (f['root'], f['fn'])
+        f_p = '%s/%s' % (f['root'].strip('/'), f['fn'])
         tmp_df = pd.read_csv(f_p, sep='\t')
+        tmp_df.Family = 'Family %i.' % n + tmp_df.Family
         mendelian_df = pd.concat([mendelian_df, tmp_df], axis=0)
-    
+        n = n+1
+   
     mendelian_df = mendelian_df.reset_index(drop=True)
     if len(mendelian_df) != 0:
       df = mendelian_df
-      Family = pd.DataFrame(["Family 1", "Family 2", "Family 3"], columns = ["Family"])
       # Extract SNV
       snv_tmp = df[df.Family.str.contains("SNV$")].drop(["Family"], axis = 1).reset_index(drop=True)
-      snv_tmp = pd.concat([Family, snv_tmp], axis = 1).dropna(axis=0)
+      snv_tmp.insert(0, "Family", ["Family %s" % i for i in range(1, len(snv_tmp.index)+1)], allow_duplicates=True)
       snv_mcr = "%s ± %s" % (round(snv_tmp['Mendelian_Concordance_Rate'].mean(), 2), round(np.std(snv_tmp['Mendelian_Concordance_Rate']), 2))
       snv_rank = self.get_mendelian_rank(history_df, snv_tmp, "SNV")
       # Extract INDEL
       indel_tmp = df[df.Family.str.contains("INDEL$")].drop(["Family"], axis = 1).reset_index(drop=True)
-      indel_tmp = pd.concat([Family, indel_tmp], axis = 1).dropna(axis=0)
+      indel_tmp.insert(0, "Family", ["Family %s" % i for i in range(1, len(indel_tmp.index)+1)], allow_duplicates=True)
       indel_mcr = "%s ± %s" % (round(indel_tmp['Mendelian_Concordance_Rate'].mean(), 2), round(np.std(snv_tmp['Mendelian_Concordance_Rate']), 2))
       indel_rank = self.get_mendelian_rank(history_df, indel_tmp, "INDEL")
 
@@ -118,30 +119,15 @@ class MultiqcModule(BaseMultiqcModule):
     f1_snv = snv_indel_df[["Sample", "SNV F1-score"]]
     f1_snv.columns = ["Sample", "F1-score"]
     f1_snv["Type"] = "SNV"
-    snv_mcr = []
-    for index, row in f1_snv.iterrows():
-      if "_1_" in row.Sample:
-        MCR = snv_tmp[snv_tmp.Family == "Family 1"]["Mendelian_Concordance_Rate"].to_list()[0]
-      elif "_2_" in row.Sample:
-        MCR = snv_tmp[snv_tmp.Family == "Family 2"]["Mendelian_Concordance_Rate"].to_list()[0]
-      elif "_3_" in row.Sample:
-        MCR = snv_tmp[snv_tmp.Family == "Family 3"]["Mendelian_Concordance_Rate"].to_list()[0]
-      snv_mcr.append(MCR)
-    #print(snv_indel_df); print(f1_snv); print(snv_mcr)
+    snv_mcr_per_family = snv_tmp["Mendelian_Concordance_Rate"].to_list()
+    snv_mcr = [var for var in snv_mcr_per_family for i in range(4)]
     f1_snv_mcr = pd.concat([f1_snv, pd.DataFrame(snv_mcr, columns = ["MCR"])], axis = 1)
     
     f1_indel = snv_indel_df[["Sample", "INDEL F1-score"]]
     f1_indel.columns = ["Sample", "F1-score"]
     f1_indel["Type"] = "INDEL"
-    indel_mcr = []
-    for index, row in f1_indel.iterrows():
-      if "_1_" in row.Sample:
-        MCR = indel_tmp[indel_tmp.Family == "Family 1"]["Mendelian_Concordance_Rate"].to_list()[0]
-      elif "_2_" in row.Sample:
-        MCR = indel_tmp[indel_tmp.Family == "Family 2"]["Mendelian_Concordance_Rate"].to_list()[0]
-      elif "_3_" in row.Sample:
-        MCR = indel_tmp[indel_tmp.Family == "Family 3"]["Mendelian_Concordance_Rate"].to_list()[0]
-      indel_mcr.append(MCR)
+    indel_mcr_per_family = indel_tmp["Mendelian_Concordance_Rate"].to_list()
+    indel_mcr = [var for var in indel_mcr_per_family for i in range(4)]
     f1_indel_mcr = pd.concat([f1_indel, pd.DataFrame(indel_mcr, columns = ["MCR"])], axis = 1)
     
     this_batch = pd.concat([f1_snv_mcr, f1_indel_mcr], axis = 0)
@@ -150,7 +136,7 @@ class MultiqcModule(BaseMultiqcModule):
     # Prepare data for scatter plot
     history_tmp_df = history_df[["sample", "mendelian", "f1", "type"]]
     history_tmp_df.columns = ["Sample", "MCR", "F1-score", "Type"]
-    history_tmp_df["Batch"] = "Rest Submmited Datasets"
+    history_tmp_df["Batch"] = "Historical Datasets"
     # Add the F1-score and MCR info of this batch
     figure_data = pd.concat([history_tmp_df, this_batch], axis = 0)
     
@@ -165,14 +151,14 @@ class MultiqcModule(BaseMultiqcModule):
     sns.despine(top=False, right=False, left=False, bottom=False)
     handles = g._legend_data.values()
     labels = g._legend_data.keys()
-    g.fig.legend(title='', handles=handles, labels=labels, loc='lower center', ncol=2, bbox_to_anchor=(0.47, -0.015, 0, 0),frameon=False) 
+    g.fig.legend(title='', handles=handles, labels=labels, loc='lower center', ncol=2, bbox_to_anchor=(0.47, -0.015, 0, 0),frameon=False)
     g.fig.subplots_adjust(bottom=0.2)
     g.fig.set_size_inches(9, 5)
     g.savefig(fig_path, dpi = 400)
 
     ### PLOT 1: SNV Performance
     snv_fig_data = figure_data[figure_data.Type == "SNV"]
-    self.quartet_scatter_plot(snv_fig_data, "snv_performance", "SNV", "SNV Performance", "snv_performance")    
+    self.quartet_scatter_plot(snv_fig_data, "snv_performance", "SNV", "SNV Performance", "snv_performance")
 
     ### PLOT 2: INDEL Performance
     indel_fig_data = figure_data[figure_data.Type == "INDEL"]
@@ -180,7 +166,7 @@ class MultiqcModule(BaseMultiqcModule):
 
     ### DETAILED TABLE 1: snv_indel_summary (variants.calling.qc.txt)
     # Plot detailed numbers of performance assessment based on reference datasets
-    # Transfer into the required format    
+    # Transfer into the required format
     detail1_dic = self.convert_input_data_format(snv_indel_df, 'Sample')
     self.detail_1('variant_calling_qc_details', detail1_dic)
 
@@ -348,11 +334,10 @@ class MultiqcModule(BaseMultiqcModule):
 
       if row["Batch"] == "Your Datasets":
         # blue
-        data[s_name]['color'] = 'rgba(109, 164, 202, 0.9)'
+        data[s_name]['color'] = '#ed6f00'
       else:
         # yellow
-        data[s_name]['color'] = 'rgba(250, 160, 81, 0.8)'
-        # green: rgba(43, 159, 43, 0.8)
+        data[s_name]['color'] = '#007dd4'
     
     pconfig = {
       'id': pconfig_id,
@@ -367,8 +352,8 @@ class MultiqcModule(BaseMultiqcModule):
         name = name,
         anchor = anchor,
         description = """Points are coloured as follows:
-        <span style="color: #6DA4CA;">Your Datasets</span>,
-        <span style="color: #FAA051;">Rest Submmited Datasets</span>.""",
+        <span style="color: #ed6f00;">Your Datasets</span>,
+        <span style="color: #007dd4;">Historical Datasets</span>.""",
         plot = scatter.plot(data, pconfig)
       )
 
