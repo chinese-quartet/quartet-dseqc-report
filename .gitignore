@@ -13,3 +13,4 @@ pom.xml.asc
 *.tar.gz
 .Rproj.user
 .env
+.DS_Store

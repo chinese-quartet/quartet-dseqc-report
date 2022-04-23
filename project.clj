@@ -1,4 +1,4 @@
-(defproject quartet-dseqc-report "0.1.3"
+(defproject quartet-dseqc-report "0.1.5"
   :description "Visualizes Quality Control(QC) results for Quartet Project."
   :url "https://github.com/chinese-quartet/quartet-dseqc-report"
   :license {:name "Eclipse Public License"
@@ -20,13 +20,14 @@
             [lein-shell "0.5.0"]
             [lein-changelog "0.3.2"]]
 
-  :aliases {"update-version" ["shell" "sed" "-i" "" "s/version \"[0-9.]*\"/version \"${:version}\"/" "src/quartet_dseqc_report/version.clj"]}
+  :aliases {"update-version" ["shell" "sed" "-i" "" "s/version \"[0-9.]*\"/version \"${:version}\"/" "src/quartet_dseqc_report/version.clj"]
+            "update-plugin-version" ["shell" "sed" "-i" "" "s/version: v[0-9.]*/version: v${:version}/" "resources/tservice-plugin.yaml"]}
   :deploy-repositories [["releases" :clojars]]
   :release-tasks [["change" "version" "leiningen.release/bump-version"]
                   ["change" "version" "leiningen.release/bump-version" "release"]
                   ["changelog" "release"]
                   ["update-version"]
-                  ["deploy"]]
+                  ["update-plugin-version"]]
 
   :main ^:skip-aot quartet-dseqc-report.cli
   :target-path   "target/%s"
