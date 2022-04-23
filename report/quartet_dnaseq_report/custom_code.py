@@ -87,7 +87,7 @@ def quartet_dnaseq_report_execution_start():
     if 'variant_calling_qc/history' not in config.sp:
         config.update_dict( config.sp, { 'variant_calling_qc/history': { 'fn_re': r'history.txt$' } } )
     
-    config.module_order = ['data_generation_information', 'pre_alignment_qc', 'post_alignment_qc', 'variant_calling_qc', 'supplementary']
+    config.module_order = ['data_generation_information', 'variant_calling_qc', 'pre_alignment_qc', 'post_alignment_qc', 'supplementary']
 
     config.exclude_modules = ['fastqc', 'fastq_screen', 'qualimap']
     
