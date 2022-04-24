@@ -163,6 +163,12 @@
        (map #(make-link protocol bucket (:key %)))
        (filter #(re-matches (filter-remote-fn mode) %))))
 
+(defn list-dirs
+  [path]
+  (let [{:keys [protocol bucket prefix]} (parse-path path)]
+    (map #(format "%s://%s/%s" protocol bucket (:key %)) 
+         (remote-fs/with-conn protocol (remote-fs/list-objects bucket prefix false)))))
+
 (defn list-files
   "Local path must not contain file:// prefix. options - directory | file"
   [path & options]
