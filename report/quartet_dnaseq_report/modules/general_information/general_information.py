@@ -25,13 +25,13 @@ class MultiqcModule(BaseMultiqcModule):
       info=' about the sequencing data.'
     )
 
-    # Find and load any input files for data_generation_information
-    for f in self.find_log_files('data_generation_information/information'):
+    # Find and load any input files for general_information
+    for f in self.find_log_files('general_information/information'):
       if f is None:
-        log.debug('No file matched: data_generation_information - data_generation_information.txt')
+        log.debug('No file matched: general_information - general_information.txt')
       else:
         information = eval(f['f'])
-        self.plot_information('data_generation_information', information)
+        self.plot_information('general_information', information)
   
   def plot_information(self, id, data, title='', section_name='', description=None, helptext=None):
     html_data = ["<dl class='dl-horizontal'>"]

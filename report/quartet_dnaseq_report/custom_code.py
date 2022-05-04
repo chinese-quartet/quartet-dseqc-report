@@ -38,9 +38,17 @@ def quartet_dnaseq_report_execution_start():
     # so we check whether the value is already set. This is to avoid
     # clobbering values that have been customised by users.
 
-    # Module-data_generation_information
-    if 'data_generation_information/information' not in config.sp:
-        config.update_dict( config.sp, { 'data_generation_information/information': { 'fn_re': r'.*information.json$' } } )
+    # Module-general_information
+    if 'general_information/information' not in config.sp:
+        config.update_dict( config.sp, { 'general_information/information': { 'fn_re': r'.*information.json$' } } )
+    
+
+    # Module-conclusion
+    if 'conclusion/precision_recall_summary' not in config.sp:
+        config.update_dict( config.sp, { 'conclusion/precision_recall_summary': { 'fn_re': r'variants.calling.qc.txt$' } } )
+    
+    if 'conclusion/mendelian_summary' not in config.sp:
+        config.update_dict( config.sp, { 'conclusion/mendelian_summary': { 'fn_re': r'.*\.summary.txt$' } } )
     
 
     # Module-pre_alignment_qc
@@ -78,16 +86,14 @@ def quartet_dnaseq_report_execution_start():
     
 
     # Module-variant_calling_qc
-    if 'variant_calling_qc/snv_indel_summary' not in config.sp:
-        config.update_dict( config.sp, { 'variant_calling_qc/snv_indel_summary': { 'fn_re': r'variants.calling.qc.txt$' } } )
+    if 'variant_calling_qc/precision_recall_summary' not in config.sp:
+        config.update_dict( config.sp, { 'variant_calling_qc/precision_recall_summary': { 'fn_re': r'variants.calling.qc.txt$' } } )
     
     if 'variant_calling_qc/mendelian_summary' not in config.sp:
         config.update_dict( config.sp, { 'variant_calling_qc/mendelian_summary': { 'fn_re': r'.*\.summary.txt$' } } )
     
-    if 'variant_calling_qc/history' not in config.sp:
-        config.update_dict( config.sp, { 'variant_calling_qc/history': { 'fn_re': r'history.txt$' } } )
     
-    config.module_order = ['data_generation_information', 'variant_calling_qc', 'pre_alignment_qc', 'post_alignment_qc', 'supplementary']
+    config.module_order = ['general_information', 'conclusion', 'pre_alignment_qc', 'post_alignment_qc', 'variant_calling_qc', 'supplementary']
 
     config.exclude_modules = ['fastqc', 'fastq_screen', 'qualimap']
     

@@ -203,29 +203,30 @@ class MultiqcModule(BaseMultiqcModule):
       'description': '% Duplicate Reads',
       'max': 100,
       'min': 0,
-      'scale': False
+      'scale': "RdYlGn-rev"
     }
 
     headers['%GC'] = {
       'title': '% GC',
       'description': 'G/C ratio',
+      "min": 0,
       'max': 100,
-      'scale': False
+      'scale': "Oranges"
     }
 
     headers['Total Sequences (million)'] = {
       'title': 'M Seqs',
       'description': 'Total Sequences (million)',
-      'min': 0,
-      'scale': False
+      "min": 0,
+      "scale": "YlGnBu",
     }
-
+    
     headers['%Human'] = {
       'title': '% Human',
       'description': '% Human',
       'max': 100,
       'min': 0,
-      'scale': False
+      'scale': 'Reds-rev'
     }
 
     headers['%EColi'] = {
@@ -233,7 +234,7 @@ class MultiqcModule(BaseMultiqcModule):
       'description': '% EColi',
       'max': 100,
       'min': 0,
-      'scale': False
+      'scale': 'Reds-rev'
     }
 
     headers['%Adapter'] = {
@@ -241,7 +242,7 @@ class MultiqcModule(BaseMultiqcModule):
       'description': '% Adapter',
       'max': 100,
       'min': 0,
-      'scale': False
+      'scale': 'Reds-rev'
     }
 
     headers['%Vector'] = {
@@ -249,7 +250,7 @@ class MultiqcModule(BaseMultiqcModule):
       'description': '% Vector',
       'max': 100,
       'min': 0,
-      'scale': False
+      'scale': 'Reds-rev'
     }
 
     headers['%rRNA'] = {
@@ -257,7 +258,7 @@ class MultiqcModule(BaseMultiqcModule):
       'description': '% rRNA',
       'max': 100,
       'min': 0,
-      'scale': False
+      'scale': 'Reds-rev'
     }
 
     headers['%Virus'] = {
@@ -265,7 +266,7 @@ class MultiqcModule(BaseMultiqcModule):
       'description': '% Virus',
       'max': 100,
       'min': 0,
-      'scale': False
+      'scale': 'Reds-rev'
     }
 
     headers['%Yeast'] = {
@@ -273,7 +274,7 @@ class MultiqcModule(BaseMultiqcModule):
       'description': '% Yeast',
       'max': 100,
       'min': 0,
-      'scale': False
+      'scale': 'Reds-rev'
     }
 
     headers['%Mitoch'] = {
@@ -281,7 +282,7 @@ class MultiqcModule(BaseMultiqcModule):
       'description': '% Mitoch',
       'max': 100,
       'min': 0,
-      'scale': False
+      'scale': 'Reds-rev'
     }
 
     headers['%No hits'] = {
@@ -289,7 +290,7 @@ class MultiqcModule(BaseMultiqcModule):
       'description': '% No hits',
       'max': 100,
       'min': 0,
-      'scale': False
+      'scale': 'Reds-rev'
     }
 
     table_config = {
@@ -299,7 +300,8 @@ class MultiqcModule(BaseMultiqcModule):
       'col1_header': 'Sample',
       'no_beeswarm': False,
       'sortRows': False,
-      'save_file': True
+      'save_file': True,
+      'format': '{:,.2f}'
     }
 
     # Add a report section with the table
@@ -398,6 +400,7 @@ class MultiqcModule(BaseMultiqcModule):
       'ymin': 0,
       'xmax': 100,
       'xmin': 0,
+      'format': '{:,.2f}',
       'yDecimals': False,
       'tt_label': '<b>{point.x}% GC</b>: {point.y}',
       'colors': self.get_status_cols('per_sequence_gc_content'),

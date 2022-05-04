@@ -123,7 +123,7 @@ class MultiqcModule(BaseMultiqcModule):
       'description': '% mapped reads',
       'max': 100,
       'min': 0,
-      'scale': False
+      'scale': 'YlGn'
     }
 
     headers['%Mismatch Rate'] = {
@@ -131,14 +131,14 @@ class MultiqcModule(BaseMultiqcModule):
       'description': 'Mismatch rate',
       'max': 100,
       'min': 0,
-      'scale': False
+      'scale': 'RdYlGn'
     }
 
     headers['Mendelian Insert Size'] = {
       'title': 'Ins. size',
       'description': 'Median insert size',
       'min': 0,
-      'scale': False
+      'scale': 'Purples'
     }
 
     for c in [20,30]:
@@ -148,7 +148,7 @@ class MultiqcModule(BaseMultiqcModule):
         'max': 100,
         'min': 0,
         'suffix': '%',
-        'scale': False
+        'scale': 'RdYlGn'
       }
 
     headers['Mean Coverage'] = {
@@ -156,7 +156,7 @@ class MultiqcModule(BaseMultiqcModule):
       'description': 'Mean coverage',
       'min': 0,
       'suffix': 'X',
-      'scale': False
+      'scale': 'Blues'
     }
     
     headers['Median Coverage'] = {
@@ -164,7 +164,7 @@ class MultiqcModule(BaseMultiqcModule):
       'description': 'Median coverage',
       'min': 0,
       'suffix': 'X',
-      'scale': False
+      'scale': 'Blues'
     }
      
     for c in [1,5,10,30]:
@@ -174,7 +174,7 @@ class MultiqcModule(BaseMultiqcModule):
         'max': 100,
         'min': 0,
         'suffix': '%',
-        'scale': False
+        'scale': 'YlOrRd'
       }
     
     table_config = {
@@ -184,7 +184,8 @@ class MultiqcModule(BaseMultiqcModule):
       'col1_header': 'Sample',
       'no_beeswarm': False,
       'sortRows': False,
-      'save_file': True
+      'save_file': True,
+      'format': '{:,.2f}'
     }
 
     # Add a report section with the table
