@@ -1,9 +1,9 @@
 Sample	pre_alignment_qc_summary_Dup	pre_alignment_qc_summary_GC	pre_alignment_qc_summary_Total_Sequences_million	pre_alignment_qc_summary_Human	pre_alignment_qc_summary_EColi	pre_alignment_qc_summary_Adapter	pre_alignment_qc_summary_Vector	pre_alignment_qc_summary_rRNA	pre_alignment_qc_summary_Virus	pre_alignment_qc_summary_Yeast	pre_alignment_qc_summary_Mitoch	pre_alignment_qc_summary_No_hits
-Quartet_DNA_WES_ILM_XTen_ARD_LCL5_1_20170531_R1	16.37	51.0	43.64	97.71	0.0	0.0	0.08	0.04	0.2	0.1	0.01	2.23
-Quartet_DNA_WES_ILM_XTen_ARD_LCL5_1_20170531_R2	15.58	51.0	43.64	97.79	0.0	0.0	0.09	0.04	0.24	0.11	0.01	2.16
-Quartet_DNA_WES_ILM_XTen_ARD_LCL6_1_20170531_R1	14.83	50.0	43.84	97.75	0.0	0.0	0.07	0.04	0.23	0.11	0.02	2.19
-Quartet_DNA_WES_ILM_XTen_ARD_LCL6_1_20170531_R2	14.2	50.0	43.84	98.07	0.0	0.0	0.09	0.04	0.25	0.12	0.02	1.89
-Quartet_DNA_WES_ILM_XTen_ARD_LCL7_1_20170531_R1	15.9	51.0	43.65	97.42	0.0	0.0	0.08	0.02	0.21	0.1	0.01	2.54
-Quartet_DNA_WES_ILM_XTen_ARD_LCL7_1_20170531_R2	15.53	51.0	43.65	98.03	0.0	0.0	0.1	0.02	0.24	0.12	0.01	1.91
-Quartet_DNA_WES_ILM_XTen_ARD_LCL8_1_20170531_R1	17.01	51.0	43.61	97.79	0.0	0.0	0.05	0.03	0.18	0.1	0.02	2.18
-Quartet_DNA_WES_ILM_XTen_ARD_LCL8_1_20170531_R2	16.67	51.0	43.61	98.31	0.0	0.0	0.08	0.03	0.23	0.12	0.02	1.66
+R18022878LU05-PGx-LCL5-1_combined_R1	18.9	50.0	59.08	99.5	0.0	1.68	1.92	0.05	0.24	0.16	0.02	0.35
+R18022878LU05-PGx-LCL5-1_combined_R2	16.81	50.0	59.08	97.03	0.0	2.66	2.87	0.04	0.24	0.11	0.02	2.8
+R18022881LU05-PGx-LCL6-1_combined_R1	18.23	50.0	50.02	99.71	0.0	1.28	1.44	0.04	0.25	0.11	0.02	0.21
+R18022881LU05-PGx-LCL6-1_combined_R2	16.39	50.0	50.02	98.4	0.0	2.06	2.26	0.04	0.27	0.12	0.02	1.52
+R18022884LU01-PGx-LCL7-1_combined_R1	21.28	51.0	66.45	99.66	0.0	1.25	1.43	0.02	0.21	0.11	0.04	0.28
+R18022884LU01-PGx-LCL7-1_combined_R2	20.41	51.0	66.45	98.52	0.0	1.96	2.14	0.03	0.22	0.11	0.04	1.4
+R18022887LU01-PGx-LCL8-1_combined_R1	17.43	51.0	48.73	99.69	0.0	1.83	2.1	0.02	0.24	0.1	0.03	0.24
+R18022887LU01-PGx-LCL8-1_combined_R2	16.12	51.0	48.73	98.7	0.0	2.83	3.04	0.02	0.22	0.1	0.03	1.22
