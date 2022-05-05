@@ -8,7 +8,7 @@
 
   :dependencies
   [[org.clojure/data.csv "1.0.0"]
-   [com.github.yjcyxky/local-fs "0.2.0"]
+   [com.github.yjcyxky/local-fs "0.1.5"]
    [com.github.yjcyxky/remote-fs "0.2.2"]
    [org.clojure/tools.logging "1.1.0"]
    [org.clojure/tools.cli "1.0.194"]
