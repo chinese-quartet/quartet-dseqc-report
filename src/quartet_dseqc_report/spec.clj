@@ -4,7 +4,7 @@
 
 (s/def ::filepath
   (st/spec
-   {:spec                (s/and string? #(re-matches #"^[a-zA-Z0-9]+:\/\/(\/|\.\/)[a-zA-Z0-9_]+.*" %))
+   {:spec                (s/and string? #(re-matches #"^[a-zA-Z0-9]+:\/\/(\/|\.\/)?[a-zA-Z0-9_]+.*" %))
     :type                :string
     :description         "File path for genomics profiled data, such as file:///xxx/xxx/data.csv"
     :swagger/default     nil

@@ -1,8 +1,9 @@
 (ns quartet-dseqc-report.task
   (:require [quartet-dseqc-report.dseqc :as dseqc]
             [local-fs.core :as fs-lib]
-            [tservice-core.plugins.env :refer [get-workdir add-env-to-path create-task! update-task!]]
+            [tservice-core.plugins.env :refer [get-workdir make-remote-link add-env-to-path create-task! update-task!]]
             [tservice-core.plugins.util :as util]
+            [clojure.string :as clj-str]
             [clojure.data.json :as json]
             [clojure.tools.logging :as log]
             [tservice-core.tasks.async :refer [publish-event! make-events-init]]
@@ -32,17 +33,17 @@
   (update-process! task-id process))
 
 (defn post-handler
-  [{{:keys [name filepath description owner plugin-context]
-     :or {description (format "Quality control report for %s" name)}
-     :as payload} :body}]
-  (log/info (format "Create a report %s with %s" name payload))
-  (let [workdir (get-workdir)
-        uuid (fs-lib/basename workdir)
-        payload (merge {:description description} payload)
-        data-dir (dseqc/correct-filepath filepath)
+  [{:keys [body owner plugin-context uuid workdir]
+    :as payload}]
+  (log/info (format "Create a report with %s" payload))
+  (let [{:keys [name filepath description]
+         :or {description (format "Quality control report for %s" name)}} body
+        payload (merge {:description description} (:body payload))
+        ;; slash in the end of filepath is crucial when you want to use it to filter oss files
+        data-dir (str (clj-str/replace (dseqc/correct-filepath filepath) #"/$" "") "/")
         log-path (fs-lib/join-paths workdir "log")
-        response {:report (format "%s/multiqc_report.html" workdir)
-                  :log log-path}
+        response {:report (make-remote-link (format "%s/multiqc_report.html" workdir))
+                  :log (make-remote-link log-path)}
         task-id (create-task! {:id             uuid
                                :name           name
                                :description    description
@@ -61,11 +62,11 @@
                     {:data-dir data-dir
                      :dest-dir workdir
                      :task-id task-id
-                     :metadata {:name name
-                                :description description
-                                :plugin-name v/plugin-name
-                                :plutin-type "ReportPlugin"
-                                :plugin-version (:plugin-version plugin-context)}})
+                     :parameters {:name name
+                                  :description description
+                                  :plugin-name v/plugin-name
+                                  :plutin-type "ReportPlugin"
+                                  :plugin-version (:plugin-version plugin-context)}})
     response))
 
 (defn- filter-mkdir-copy
@@ -77,30 +78,36 @@
       (log/warn (format "Cannot find any files with pattern %s, please check your data." fmc-patterns))
       (dseqc/copy-files! files-keep files-keep-dir {:replace-existing true}))))
 
+(defn copy-files-to-dir
+  [data-dir dest-dir]
+  (filter-mkdir-copy (format "%s%s" data-dir "call-extract_tables") [".*.txt"] dest-dir "call-extract_tables")
+  (filter-mkdir-copy (format "%s%s" data-dir "call-qualimap_D5") [".*zip"] dest-dir "call-qualimap_D5")
+  (filter-mkdir-copy (format "%s%s" data-dir "call-qualimap_D6") [".*zip"] dest-dir "call-qualimap_D6")
+  (filter-mkdir-copy (format "%s%s" data-dir "call-qualimap_F7") [".*zip"] dest-dir "call-qualimap_F7")
+  (filter-mkdir-copy (format "%s%s" data-dir "call-qualimap_M8") [".*zip"] dest-dir "call-qualimap_M8")
+  (filter-mkdir-copy (format "%s%s" data-dir "call-fastqc_D5") [".*.(zip|html)"] dest-dir "call-fastqc_D5")
+  (filter-mkdir-copy (format "%s%s" data-dir "call-fastqc_D6") [".*.(zip|html)"] dest-dir "call-fastqc_D6")
+  (filter-mkdir-copy (format "%s%s" data-dir "call-fastqc_F7") [".*.(zip|html)"] dest-dir "call-fastqc_F7")
+  (filter-mkdir-copy (format "%s%s" data-dir "call-fastqc_M8") [".*.(zip|html)"] dest-dir "call-fastqc_M8")
+  (filter-mkdir-copy (format "%s%s" data-dir "call-merge_mendelian") [".*.txt"] dest-dir "call-merge_mendelian"))
+
 (defn make-report!
   "Chaining Pipeline: filter-files -> copy-files -> multiqc."
   [{:keys [data-dir parameters dest-dir task-id]}]
   (log/info "Generate quartet dnaseq report: " data-dir parameters dest-dir)
   (let [parameters-file (fs-lib/join-paths dest-dir "general_information.json")
-        log-path (fs-lib/join-paths dest-dir "log")]
+        log-path (fs-lib/join-paths dest-dir "log")
+        subdirs (dseqc/list-dirs data-dir)]
     (try
-      (filter-mkdir-copy data-dir [".*call-extract_tables/.*.txt"] dest-dir "call-extract_tables")
-      (filter-mkdir-copy data-dir [".*call-qualimap_D5/.*zip"] dest-dir "call-qualimap_D5")
-      (filter-mkdir-copy data-dir [".*call-qualimap_D6/.*zip"] dest-dir "call-qualimap_D6")
-      (filter-mkdir-copy data-dir [".*call-qualimap_F7/.*zip"] dest-dir "call-qualimap_F7")
-      (filter-mkdir-copy data-dir [".*call-qualimap_M8/.*zip"] dest-dir "call-qualimap_M8")
-      (filter-mkdir-copy data-dir [".*call-fastqc_D5/.*.(zip|html)"] dest-dir "call-fastqc_D5")
-      (filter-mkdir-copy data-dir [".*call-fastqc_D6/.*.(zip|html)"] dest-dir "call-fastqc_D6")
-      (filter-mkdir-copy data-dir [".*call-fastqc_F7/.*.(zip|html)"] dest-dir "call-fastqc_F7")
-      (filter-mkdir-copy data-dir [".*call-fastqc_M8/.*.(zip|html)"] dest-dir "call-fastqc_M8")
-      (filter-mkdir-copy data-dir [".*call-merge_mendelian/.*.txt"] dest-dir "call-merge_mendelian")
+      (doseq [subdir subdirs]
+        (copy-files-to-dir subdir dest-dir))
       (update-process! task-id 10)
       (spit parameters-file (json/write-str parameters))
       (doseq [files-qualimap-tar (dseqc/batch-filter-files dest-dir [".*qualimap.zip"])]
         (dseqc/decompression-tar files-qualimap-tar))
       (update-process! task-id 50)
-      (spit parameters-file (json/write-str {"Report Name" (:name parameters)
-                                             "Description" (:description parameters)
+      (spit parameters-file (json/write-str {"Report Name" (or (:name parameters) "Quartet QC Report for DNA-Seq")
+                                             "Description" (or (:description parameters) "Visualizes Quality Control(QC) Results for Quartet DNA-Seq Data.")
                                              "Report Tool" (format "%s-%s"
                                                                    (:plugin-name parameters)
                                                                    (:plugin-version parameters))
