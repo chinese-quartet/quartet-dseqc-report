@@ -5,7 +5,7 @@ MultiReport for Quartet DNAseq QC
 
 from setuptools import setup, find_packages
 
-version = '0.1.5'
+version = '0.2.0'
 
 setup(
     name = 'quartet_dnaseq_report',
@@ -29,7 +29,8 @@ setup(
     ],
     entry_points = {
         'multiqc.modules.v1': [
-            'data_generation_information = quartet_dnaseq_report.modules.data_generation_information:MultiqcModule',
+            'general_information = quartet_dnaseq_report.modules.general_information:MultiqcModule',
+            'conclusion = quartet_dnaseq_report.modules.conclusion:MultiqcModule',
             'pre_alignment_qc = quartet_dnaseq_report.modules.pre_alignment_qc:MultiqcModule',
             'post_alignment_qc = quartet_dnaseq_report.modules.post_alignment_qc:MultiqcModule',
             'variant_calling_qc = quartet_dnaseq_report.modules.variant_calling_qc:MultiqcModule',

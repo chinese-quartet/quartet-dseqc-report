@@ -21,6 +21,3 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## v0.1.4 — 2021-07-23
 Released without _CHANGELOG.md_.
-
-
-[Unreleased]: https://github.com/chinese-quartet/quartet-dseqc-report/compare/0.1.6...HEAD

@@ -1,3 +1,0 @@
-Sample	variant_calling_qc_summary_Precision	variant_calling_qc_summary_Recall	variant_calling_qc_summary_F1_score	variant_calling_qc_summary_Rank
-INDEL	0.85 ± 0.09	0.37 ± 0.42	0.41 ± 0.39	10/10
-SNV	0.91 ± 0.06	0.4 ± 0.43	0.45 ± 0.39	10/10

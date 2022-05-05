@@ -1,3 +1,0 @@
-Sample	mendelian_summary_Mendelian_Concordance_Rate	mendelian_summary_Rank-1
-INDEL	0.43 ± 0.31	10/10
-SNV	0.54 ± 0.31	10/10

@@ -100,7 +100,7 @@
 (defn gen-multiqc-config
   [config-file]
   (let [config (yaml/generate-string
-                {:run_modules ["data_generation_information"
+                {:run_modules ["general_information"
                                "pre_alignment_qc"
                                "variant_calling_qc"
                                "post_alignment_qc"

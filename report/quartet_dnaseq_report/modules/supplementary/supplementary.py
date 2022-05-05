@@ -52,6 +52,9 @@ class MultiqcModule(BaseMultiqcModule):
                     <p>
                         (2)	Mendelian concordance rate (MCR) is the number of variants following Mendelian inheritance laws divided by the total number of variants called among the four Quartet samples. Mendelian concordant variants are the variants shared by the twins (D5 and D6) and following Mendelian inheritance laws with parents (Father: F7 and Mother M8).  Mendelian analysis was performed using VBT (https://github.com/sbg/VBT-TrioAnalysis). When calculating Mendelian concordance rate of small variants, variants on large deletions were not included, because VBT takes these variants as Mendelian violations.
                     </p>
+                    <p>
+                        (3) Total score = (1+0.5^2) x SNV_score x INDEL_score / (0.5^2 x SNV_score + INDEL_score). SNV_score and INDEL_score are obtained by calculating the mean values of Precision, Recall, and MCR, respectively.
+                    </p>
                 </div>
             </div>
 
@@ -81,7 +84,7 @@ class MultiqcModule(BaseMultiqcModule):
             <div class='software'>
                 <h3 class='section-header black'>Software</h3>
                 <dl class='dl-horizontal'>
-                    <dt style='text-align:left;width:300px;font-weight:normal;margin-top:1ex'>Sentieon Genomics (FASTQ to VCF)</dt><dd>v2018.08.01</dd>
+                    <dt style='text-align:left;width:300px;font-weight:normal;margin-top:1ex'>Sentieon Genomics (FASTQ to VCF)</dt><dd>v2019.11.28</dd>
                     <dt style='text-align:left;width:300px;font-weight:normal;margin-top:1ex'>FastQC</dt><dd>v0.11.5</dd>
                     <dt style='text-align:left;width:300px;font-weight:normal;margin-top:1ex'>FastQ Screen</dt><dd>v0.12.0</dd>
                     <dt style='text-align:left;width:300px;font-weight:normal;margin-top:1ex'>Qualimap</dt><dd>v2.0.0</dd>

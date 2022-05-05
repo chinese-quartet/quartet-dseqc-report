@@ -1,4 +1,2 @@
 Sample	mendelian_details_SNV_Detected_Variants	mendelian_details_SNV_Mendelian_Consistent_Variants	mendelian_details_INDEL_Detected_Variants	mendelian_details_INDEL_Mendelian_Consistent_Variants
-Family 1	607481	209988	140051	30681
-Family 2	677481	249988	110051	31681
-Family 3	5124840	4969801	1273388	1031451
+Queried_Data_Set1	5235240	5063285	1265334	1104285
