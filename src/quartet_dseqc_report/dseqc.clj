@@ -97,18 +97,6 @@
        (merge-exp)
        (write-csv-by-ordered-cols! path)))
 
-(defn gen-multiqc-config
-  [config-file]
-  (let [config (yaml/generate-string
-                {:run_modules ["general_information"
-                               "pre_alignment_qc"
-                               "variant_calling_qc"
-                               "post_alignment_qc"
-                               "supplementary"]
-                 :skip_generalstats true}
-                :dumper-options {:flow-style :block})]
-    (spit config-file config)))
-
 (defn decompression-tar
   [filepath]
   (shell/with-sh-env {:PATH   (add-env-to-path "quartet-dnaseq-report")

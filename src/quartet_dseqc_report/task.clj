@@ -82,8 +82,7 @@
   [{:keys [data-dir parameters dest-dir task-id]}]
   (log/info "Generate quartet dnaseq report: " data-dir parameters dest-dir)
   (let [parameters-file (fs-lib/join-paths dest-dir "general_information.json")
-        log-path (fs-lib/join-paths dest-dir "log")
-        config-file (fs-lib/join-paths dest-dir "multireport.conf")]
+        log-path (fs-lib/join-paths dest-dir "log")]
     (try
       (filter-mkdir-copy data-dir [".*call-extract_tables/.*.txt"] dest-dir "call-extract_tables")
       (filter-mkdir-copy data-dir [".*call-qualimap_D5/.*zip"] dest-dir "call-qualimap_D5")
@@ -100,7 +99,6 @@
       (doseq [files-qualimap-tar (dseqc/batch-filter-files dest-dir [".*qualimap.zip"])]
         (dseqc/decompression-tar files-qualimap-tar))
       (update-process! task-id 50)
-      (dseqc/gen-multiqc-config config-file)
       (spit parameters-file (json/write-str {"Report Name" (:name parameters)
                                              "Description" (:description parameters)
                                              "Report Tool" (format "%s-%s"
@@ -110,7 +108,6 @@
                                              "Date" (date)}))
       (let [result (dseqc/multiqc dest-dir dest-dir {:template "quartet_dnaseq_report"
                                                      :title "Quartet DNA report"
-                                                     :config config-file
                                                      :env {:PATH (add-env-to-path "quartet-dseqc-report")}})
             log (json/write-str result)]
         (log/info "Status: " result)
