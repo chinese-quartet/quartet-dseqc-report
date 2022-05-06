@@ -29,7 +29,7 @@ class MultiqcModule(BaseMultiqcModule):
       target='The additional information',
       info=' about this quality assessment report.'
     )
-    
+
     html = '''
       <!-- Methods -->
       <div class='methods'>
@@ -39,9 +39,9 @@ class MultiqcModule(BaseMultiqcModule):
             <b>1.</b>	Tested call sets were compared with benchmark small variants using hap.py (https://github.com/Illumina/hap.py).  Precision is the fraction of called variants in the test dataset that are true, and recall is the fraction of true variants are called in the test dataset. True Positives (TP) are true variants detected in the test dataset. False Negatives (FN) are variants in the reference dataset failed to be detected in the test dataset. False Positive (FP) are variants called in the test dataset but not included in the reference dataset. Precision and recall are defined as below:
           </p>
           <p>
-            &nbsp;&nbsp;Precision = TP / (TP+FP)<br>
-            &nbsp;&nbsp;Recall=TP/(TP+FN)<br>
-            &nbsp;&nbsp;F1=(2×Precision×Recall)/(Precision+Recall)
+            <li>Precision = TP / (TP+FP)</li>
+            <li>Recall=TP/(TP+FN)</li>
+            <li>F1=(2×Precision×Recall)/(Precision+Recall)</li>
           </p>
           <p>
             <b>2.</b>	Mendelian concordance rate (MCR) is the number of variants following Mendelian inheritance laws divided by the total number of variants called among the four Quartet samples. Mendelian concordant variants are the variants shared by the twins (D5 and D6) and following Mendelian inheritance laws with parents (Father: F7 and Mother M8).  Mendelian analysis was performed using VBT (https://github.com/sbg/VBT-TrioAnalysis). When calculating Mendelian concordance rate of small variants, variants on large deletions were not included, because VBT takes these variants as Mendelian violations.

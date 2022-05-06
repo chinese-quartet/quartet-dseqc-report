@@ -299,22 +299,23 @@ class MultiqcModule(BaseMultiqcModule):
       name = 'Evaluation metrics',
       anchor = id + '_anchor',
       description = """
-      The submitted data to be tested can be divided into 4 levels based on the Quartile Index of the metrics scores by comparing with historical batches: <span style="color: #b80d0d;font-weight:bold">Bad</span>, <span style="color: #d97c11;font-weight:bold">Fair</span>, <span style="color: #70c402;font-weight:bold">Good</span>, <span style="color: #0f9115;font-weight:bold">Great</span>.<br>
-      The total score was obtained by weighting the performance of SNV and INDEL in terms of Precision, Recall, and MCR.
+      The submitted data can be divided into 4 levels based on the Quartile Index of the metrics scores by comparing with historical batches: <span style="color: #b80d0d;font-weight:bold">Bad</span>, <span style="color: #d97c11;font-weight:bold">Fair</span>, <span style="color: #70c402;font-weight:bold">Good</span>, <span style="color: #0f9115;font-weight:bold">Great</span>.<br>
       """,
       plot = overview_html + '\n' + table_html,
       helptext = helptext if helptext else '''
-      **Four categories of performance:**
-      
-      * _Bad_ - Total score in the bottom 20% of all historical datasets.
-      * _Fair_ - Total score in the bottom 20% of all historical datasets.
-      * _Good_ - Total score in the bottom 20% of all historical datasets.
-      * _Great_ - Total score in the top 20% of all historical datasets.
-      
       **Evaluation metrics:**
       
       * The total score is F0.5-measure of the respective SNV and INDEL scores, which are the mean values of Precision, Recall, and MCR. The total score along with the specific results for each evaluation metrics are presented in the table below.
       * For better comparison and presentation, the total score was scaled to the interval [1, 10], with the worst dataset being 1 and the best dataset scoring 10.
+
+      **Four levels of performance:**
+      
+      Based on the scaled total score, the evaluated dataset will be ranked together with all Quarte historical datasets. The higher the score, the higher the ranking. After this, the performance levels will be assigned based on their ranking ranges.
+
+      * _Bad_ - the bottom 20%.
+      * _Fair_ - between bottom 20% and median 50%.
+      * _Good_ - between median 50% and top 20%.
+      * _Great_ - the top 20%.
       '''
     )
   
@@ -334,6 +335,8 @@ class MultiqcModule(BaseMultiqcModule):
       "square": False,
       "xcats_samples": False,
       "reverseColors": True,
+      "height": 251,
+      "borderWidth": 0.1
     }
     
     self.add_section(
