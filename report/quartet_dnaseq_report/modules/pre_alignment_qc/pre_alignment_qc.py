@@ -309,17 +309,6 @@ class MultiqcModule(BaseMultiqcModule):
       name = section_name if section_name else 'Summary metrics',
       anchor = id + '_anchor',
       description = description if description else '',
-      helptext = helptext if helptext else '''
-      This longer description explains what exactly the numbers mean
-      and supports markdown formatting. This means that we can do _this_:
-
-      * Something important
-      * Something else important
-      * Best of all - some `code`
-
-      Doesn't matter if this is copied from documentation - makes it
-      easier for people to find quickly.
-      ''',
       plot = table.plot(data, headers, table_config)
     )
   

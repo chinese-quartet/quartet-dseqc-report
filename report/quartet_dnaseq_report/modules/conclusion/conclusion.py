@@ -35,7 +35,7 @@ class MultiqcModule(BaseMultiqcModule):
             os.path.dirname(__file__), "assets", "css", "rank.css"
         )
     }
-
+    
     ### Load historical performance
     quartet_ref = pd.read_csv(os.path.join(os.path.dirname(__file__), 'assets', 'quartet_reference.txt'), sep='\t')
     if len(quartet_ref) == 0:
@@ -92,7 +92,7 @@ class MultiqcModule(BaseMultiqcModule):
     queried_performance = pr_df.merge(mendelian_df, on=['sample', 'group', 'batch'])
     queried_performance = queried_performance[quartet_ref.columns]
     # Rows of df takes a set of Quartet samples as a unit
-    df = pd.concat([queried_performance, quartet_ref], axis=0)
+    df = pd.concat([quartet_ref, queried_performance], axis=0)
     batches = df.batch.drop_duplicates().to_list()
     quality_metrics_list = []
     for bat in batches:
@@ -119,7 +119,7 @@ class MultiqcModule(BaseMultiqcModule):
     # quantile_df =  quality_metrics_df.quantile([.25, .5, .75])
     # quantile_df = quantile_df.append(quantile_df.loc[.75] - quantile_df.loc[.25], ignore_index=True)
     # quantile_df.index = ['Q1', 'Q2', 'Q3', 'IQR']
-    quantile_df =  quality_metrics_df.quantile([.15, .5, .85]); quantile_df.index = ['Q1', 'Q2', 'Q3']
+    quantile_df =  quality_metrics_df.quantile([.2, .5, .8]); quantile_df.index = ['Q1', 'Q2', 'Q3']
     for index, row in quality_metrics_df.iterrows():
       for metric in ['precision_snv', 'precision_indel', 'recall_snv', 'recall_indel', 'mendelian_snv', 'mendelian_indel', 'total']:
         if row[metric] < quantile_df.loc['Q1', metric]:# - 1.5*quantile_df.loc['IQR', metric]:
@@ -143,7 +143,7 @@ class MultiqcModule(BaseMultiqcModule):
     for metric in full_name.keys():
       evaluation_metrics.append([full_name[metric], quality_metrics_df[quality_metrics_df.batch=='Queried_Data'][metric].to_list()[0], 
       '%.3f ± %.3f' % (quality_metrics_df[metric].mean(), quality_metrics_df[metric].std()), 
-      '%.0f / %.0f' % (rank_df[rank_df.batch=='Queried_Data'][metric].to_list()[0], rank_df[metric].max()), 
+      '%.0f / %.0f' % (rank_df[rank_df.batch=='Queried_Data'][metric].to_list()[0], len(rank_df[metric])), 
       quality_metrics_df[quality_metrics_df.batch=='Queried_Data']['%s_performance'  % metric].to_list()[0]])
     
     evaluation_metrics_df = pd.DataFrame(evaluation_metrics, columns=['Quality Metrics', 'Value', 'Historical value (mean ± SD)', 'Rank', 'Performance'])
@@ -153,7 +153,7 @@ class MultiqcModule(BaseMultiqcModule):
     rank_slim = rank_df[['batch', 'total']]; rank_slim.columns = ['batch', 'rank']
     overview_data = overview_data.merge(rank_slim, on='batch')
     if len(table_summary_dic) != 0:
-      self.plot_summary_table('conclusion_summary', table_summary_dic, overview_data)
+      self.plot_summary_table('conclusion_summary', table_summary_dic, overview_data, quantile_df)
     else:
       log.debug('No file matched: conclusion - conclusion_table.tsv')
     
@@ -188,32 +188,63 @@ class MultiqcModule(BaseMultiqcModule):
   
 
   ### Function 1: Evaluation metrics
-  def plot_summary_table(self, id, table_data, overview_data, title='', section_name='', description=None):
+  def plot_summary_table(self, id, table_data, overview_data, quantile_df, title='', section_name='', description=None, helptext=None):
     # Overview
     overview_data.sort_values('total', inplace=True, ascending=True)
+    # Scale total score into 1-10
+    a = 1
+    b = 10
+    score_raw = overview_data.total.to_list()
+    k = (b-a)/(max(score_raw)-min(score_raw))
+    score_norm = []
+    for s in score_raw:
+      score_norm.append(round(a + k * (s - min(score_raw)), 2))
+    overview_data.insert(0, 'total_score_norm', score_norm)
+    # print(score_norm); print(score_raw); print(overview_data)
+    Q1 = round(a + k * (quantile_df.loc['Q1', 'total'] - min(score_raw)), 2)
+    Q2 = round(a + k * (quantile_df.loc['Q2', 'total'] - min(score_raw)), 2)
+    Q3 = round(a + k * (quantile_df.loc['Q3', 'total'] - min(score_raw)), 2)
     # Calculate percentage
     total = overview_data.shape[0]
-    bad = "%.2f%s" % (int(overview_data.total_performance.value_counts().to_dict()['Bad'])/total * 100, '%')
-    fair = "%.2f%s" % (int(overview_data.total_performance.value_counts().to_dict()['Fair'])/total * 100, '%')
-    good = "%.2f%s" % (int(overview_data.total_performance.value_counts().to_dict()['Good'])/total * 100, '%')
-    great = "%.2f%s" % (int(overview_data.total_performance.value_counts().to_dict()['Great'])/total * 100, '%')
-    queried = "%.2f%s" % (overview_data[overview_data.batch == 'Queried_Data']['rank'].mean()/total * 100, '%')
-    queried_double = "%.2f%s" % (((total-overview_data[overview_data.batch == 'Queried_Data']['rank'].mean())*2/total+1/total) * 100, '%')
-    # print(queried_double)
+    bad_len = int(overview_data.total_performance.value_counts().to_dict()['Bad'])/total * 100
+    bad = "%.2f%s" % (bad_len, '%')
+    fair_len = int(overview_data.total_performance.value_counts().to_dict()['Fair'])/total * 100
+    fair = "%.2f%s" % (fair_len, '%')
+    good_len = int(overview_data.total_performance.value_counts().to_dict()['Good'])/total * 100
+    good = "%.2f%s" % (good_len, '%')
+    great_len = int(overview_data.total_performance.value_counts().to_dict()['Great'])/total * 100
+    great = "%.2f%s" % (great_len, '%')
+    # Queried data arrow and score
+    score = "%.2f" % overview_data[overview_data.batch == 'Queried_Data']['total_score_norm'].mean()
+    queried = "%.2f%s" % (((total-overview_data[overview_data.batch == 'Queried_Data']['rank'].mean())*2/total+1/total) * 100, '%')
+    # Position of ticks
+    tick_Q1 = "%.2f%s" % (bad_len-0.8, '%')
+    tick_Q2 = "%.2f%s" % (bad_len+fair_len-1, '%')
+    tick_Q3 = "%.2f%s" % (bad_len+fair_len+good_len-1, '%')
+    # print(tick_Q1, tick_Q2, tick_Q3)
     overview_html = """
-    <div class="progress">
-      <div class="progress-bar progress-bar-bad" style="width: {bad}" data-toggle="tooltip" title="" data-original-title="">Bad</div>
-      <div class="progress-bar progress-bar-fair" style="width: {fair}" data-toggle="tooltip" title="" data-original-title="">Fair</div>
-      <div class="progress-bar progress-bar-good" style="width: {good}" data-toggle="tooltip" title="" data-original-title="">Good</div>
-      <div class="progress-bar progress-bar-great" style="width: {great}" data-toggle="tooltip" title="" data-original-title="">Great</div>
+    <!-- Arrow -->
+    <div class="arrow" style="width: {queried}; margin-top:10px; height: 35px;">
+      <svg class="lower-tangle" transform="translate(0 18)"></svg>
+      <span class="lower-label" style="margin-bottom: 25px;"><b> {score} </b></span>
     </div>
     
-    <div class="arrow" style="width: {queried_double}">
-      <svg class="tangle" transform="translate(0 -25)">
-      </svg>
-      <span class="label"> {queried} </span>
+    <!-- Progress bar -->
+    <div class="progress">
+      <div class="progress-bar progress-bar-bad" style="width: {bad}" data-toggle="tooltip" title="" data-original-title=""><b>Bad</b></div>
+      <div class="progress-bar progress-bar-fair" style="width: {fair}" data-toggle="tooltip" title="" data-original-title=""><b>Fair</b></div>
+      <div class="progress-bar progress-bar-good" style="width: {good}" data-toggle="tooltip" title="" data-original-title=""><b>Good</b></div>
+      <div class="progress-bar progress-bar-great" style="width: {great}" data-toggle="tooltip" title="" data-original-title=""><b>Great</b></div>
     </div>
-    """.format(bad=bad, fair=fair, good=good, great=great, queried_double=queried_double, queried='Your dataset')
+    
+    <!-- Scale interval -->
+    <span style="float:left; left:0%; position:relative; margin-top:-20px; color: #9F9FA3; font-size: 14px; text-align: center; display: inline-block">1</span>
+    <span style="float:left; left:{tick_Q1}; position:relative; margin-top:-20px; color: #9F9FA3; font-size: 14px; text-align: center; display: inline-block">{Q1}</span>
+    <span style="float:left; left:{tick_Q2}; position:relative; margin-top:-20px; color: #9F9FA3; font-size: 14px; text-align: center; display: inline-block">{Q2}</span>
+    <span style="float:left; left:{tick_Q3}; position:relative; margin-top:-20px; color: #9F9FA3; font-size: 14px; text-align: center; display: inline-block">{Q3}</span>
+    <span style="float:left; left:99%; position:relative; margin-top:-20px; color: #9F9FA3; font-size: 14px; text-align: center; display: inline-block">10</span>
+    <br>
+    """.format(queried=queried, score=score, bad=bad, fair=fair, good=good, great=great, Q1=Q1, Q2=Q2, Q3=Q3, tick_Q1=tick_Q1, tick_Q2=tick_Q2, tick_Q3=tick_Q3)
     
     # Table
     headers = OrderedDict()
@@ -269,9 +300,22 @@ class MultiqcModule(BaseMultiqcModule):
       anchor = id + '_anchor',
       description = """
       The submitted data to be tested can be divided into 4 levels based on the Quartile Index of the metrics scores by comparing with historical batches: <span style="color: #b80d0d;font-weight:bold">Bad</span>, <span style="color: #d97c11;font-weight:bold">Fair</span>, <span style="color: #70c402;font-weight:bold">Good</span>, <span style="color: #0f9115;font-weight:bold">Great</span>.<br>
-      The total score was obtained by weighting the performance of SNV and INDEL in terms of Precision, Recall, and MCR. Please see Methods for details.
+      The total score was obtained by weighting the performance of SNV and INDEL in terms of Precision, Recall, and MCR.
       """,
-      plot = overview_html + '\n' + table_html
+      plot = overview_html + '\n' + table_html,
+      helptext = helptext if helptext else '''
+      **Four categories of performance:**
+      
+      * _Bad_ - Total score in the bottom 20% of all historical datasets.
+      * _Fair_ - Total score in the bottom 20% of all historical datasets.
+      * _Good_ - Total score in the bottom 20% of all historical datasets.
+      * _Great_ - Total score in the top 20% of all historical datasets.
+      
+      **Evaluation metrics:**
+      
+      * The total score is F0.5-measure of the respective SNV and INDEL scores, which are the mean values of Precision, Recall, and MCR. The total score along with the specific results for each evaluation metrics are presented in the table below.
+      * For better comparison and presentation, the total score was scaled to the interval [1, 10], with the worst dataset being 1 and the best dataset scoring 10.
+      '''
     )
   
 
@@ -304,6 +348,10 @@ class MultiqcModule(BaseMultiqcModule):
 
   ### Function 3: Plot SNV or INDEL based on reference datasets table and scatter plot
   def plot_mcr_f1_scatter(self, id, fig_data, title=None, section_name=None, description=None, helptext=None):
+    
+    fig_data['Mendelian Concordance Rate'] = fig_data['Mendelian Concordance Rate'].map(lambda x: ('%.4f') % x)
+    fig_data['F1-score'] = fig_data['F1-score'].map(lambda x: ('%.4f') % x)
+    
     fig = px.scatter(fig_data, 
           x = 'Mendelian Concordance Rate', y = 'F1-score',
           symbol = 'Group',
@@ -312,7 +360,7 @@ class MultiqcModule(BaseMultiqcModule):
           color = 'Group', 
           color_discrete_map={"PCR": "#2f5c85", "PCR-free": "#7ba1c7", "Queried": "#bb1616"},
           marginal_y='box', marginal_x='box', 
-          hover_data={'Mendelian Concordance Rate': ':.3f', 'F1-score': ':.3f', 'Batch': True})
+          hover_data={'Mendelian Concordance Rate': ':.4f', 'F1-score': ':.4f', 'Batch': True})
     
     fig.update_traces(marker=dict(size=10, line_color='white', line_width=0.5))
     fig.update_layout(xaxis_title='Mendelian Concordance Rate',
@@ -321,7 +369,7 @@ class MultiqcModule(BaseMultiqcModule):
                                 size=12.5,
                                 color="black"),
                       template="simple_white")
-
+    
     html = plotly_plot(fig, {
           'id': id + '_plot',
           'data_id': id + '_data',
