@@ -98,6 +98,7 @@
   (let [parameters-file (fs-lib/join-paths dest-dir "general_information.json")
         log-path (fs-lib/join-paths dest-dir "log")
         subdirs (dseqc/list-dirs data-dir)]
+    (log/info "List subdirs: " subdirs)
     (try
       (doseq [subdir subdirs]
         (copy-files-to-dir subdir dest-dir))
