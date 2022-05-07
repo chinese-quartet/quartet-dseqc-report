@@ -119,7 +119,8 @@ class MultiqcModule(BaseMultiqcModule):
     # quantile_df =  quality_metrics_df.quantile([.25, .5, .75])
     # quantile_df = quantile_df.append(quantile_df.loc[.75] - quantile_df.loc[.25], ignore_index=True)
     # quantile_df.index = ['Q1', 'Q2', 'Q3', 'IQR']
-    quantile_df =  quality_metrics_df.quantile([.2, .5, .8]); quantile_df.index = ['Q1', 'Q2', 'Q3']
+    quantile_df =  quality_metrics_df[quality_metrics_df.batch != 'Queried_Data'].quantile([.2, .5, .8])
+    quantile_df.index = ['Q1', 'Q2', 'Q3']
     for index, row in quality_metrics_df.iterrows():
       for metric in ['precision_snv', 'precision_indel', 'recall_snv', 'recall_indel', 'mendelian_snv', 'mendelian_indel', 'total']:
         if row[metric] < quantile_df.loc['Q1', metric]:# - 1.5*quantile_df.loc['IQR', metric]:
@@ -194,34 +195,46 @@ class MultiqcModule(BaseMultiqcModule):
     # Scale total score into 1-10
     a = 1
     b = 10
+    score_raw_ref = overview_data[overview_data['batch'] != 'Queried_Data'].total.to_list()
+    print(score_raw_ref)
     score_raw = overview_data.total.to_list()
-    k = (b-a)/(max(score_raw)-min(score_raw))
+    k = (b-a)/(max(score_raw_ref)-min(score_raw_ref))
     score_norm = []
     for s in score_raw:
-      score_norm.append(round(a + k * (s - min(score_raw)), 2))
+      score_norm.append(round(a + k * (s - min(score_raw_ref)), 2))
     overview_data.insert(0, 'total_score_norm', score_norm)
-    # print(score_norm); print(score_raw); print(overview_data)
-    Q1 = round(a + k * (quantile_df.loc['Q1', 'total'] - min(score_raw)), 2)
-    Q2 = round(a + k * (quantile_df.loc['Q2', 'total'] - min(score_raw)), 2)
-    Q3 = round(a + k * (quantile_df.loc['Q3', 'total'] - min(score_raw)), 2)
+    print(score_norm); print(score_raw); print(overview_data)
+    Q1 = round(a + k * (quantile_df.loc['Q1', 'total'] - min(score_raw_ref)), 2)
+    Q2 = round(a + k * (quantile_df.loc['Q2', 'total'] - min(score_raw_ref)), 2)
+    Q3 = round(a + k * (quantile_df.loc['Q3', 'total'] - min(score_raw_ref)), 2)
     # Calculate percentage
     total = overview_data.shape[0]
-    bad_len = int(overview_data.total_performance.value_counts().to_dict()['Bad'])/total * 100
+    # bad_len = int(overview_data.total_performance.value_counts().to_dict()['Bad'])/total * 100
+    bad_len = 20
     bad = "%.2f%s" % (bad_len, '%')
-    fair_len = int(overview_data.total_performance.value_counts().to_dict()['Fair'])/total * 100
+    # fair_len = int(overview_data.total_performance.value_counts().to_dict()['Fair'])/total * 100
+    fair_len = 30
     fair = "%.2f%s" % (fair_len, '%')
-    good_len = int(overview_data.total_performance.value_counts().to_dict()['Good'])/total * 100
+    # good_len = int(overview_data.total_performance.value_counts().to_dict()['Good'])/total * 100
+    good_len = 30
     good = "%.2f%s" % (good_len, '%')
-    great_len = int(overview_data.total_performance.value_counts().to_dict()['Great'])/total * 100
+    # great_len = int(overview_data.total_performance.value_counts().to_dict()['Great'])/total * 100
+    great_len = 20
     great = "%.2f%s" % (great_len, '%')
     # Queried data arrow and score
     score = "%.2f" % overview_data[overview_data.batch == 'Queried_Data']['total_score_norm'].mean()
-    queried = "%.2f%s" % (((total-overview_data[overview_data.batch == 'Queried_Data']['rank'].mean())*2/total+1/total) * 100, '%')
+    queried = "%.2f%s" % (((total-overview_data[overview_data.batch == 'Queried_Data']['rank'].mean())*2/total + 1/total) * 100, '%')
+    if float(score) <= 1:
+      queried = "0%"
+      score = 1
+    elif float(score) >= 10:
+      queried = "200%"
+      score = 10
     # Position of ticks
     tick_Q1 = "%.2f%s" % (bad_len-0.8, '%')
     tick_Q2 = "%.2f%s" % (bad_len+fair_len-1, '%')
     tick_Q3 = "%.2f%s" % (bad_len+fair_len+good_len-1, '%')
-    # print(tick_Q1, tick_Q2, tick_Q3)
+    print(tick_Q1, tick_Q2, tick_Q3)
     overview_html = """
     <!-- Arrow -->
     <div class="arrow" style="width: {queried}; margin-top:10px; height: 35px;">
