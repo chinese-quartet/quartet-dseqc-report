@@ -27,7 +27,7 @@ class MultiqcModule(BaseMultiqcModule):
       name='Post-alignment Quality Control',
       target='Post-alignment QC',
       #anchor='post_alignment_qc',
-      #href='https://github.com/clinico-omics/quartet-dnaseq-report',
+      #href='https://github.com/chinese-quartet/quartet-dseqc-report',
       info=' is an report module to show the data quality after alignment.'
     )
 

@@ -19,7 +19,7 @@ To use this plugin, you need to install MultiQC and install `quartet-dnaseq-repo
 pip install multiqc
 
 # Install quartet-dnaseq-report
-git clone https://github.com/clinico-omics/quartet-dnaseq-report.git
+git clone https://github.com/chinese-quartet/quartet-dseqc-report.git
 cd quartet-dnaseq-report
 python setup.py install
 ```
@@ -47,8 +47,8 @@ If you're developing this code, you'll want to clone it locally and install
 it manually instead of using `pip`:
 
 ```shell
-git clone https://github.com/clinico-omics/quartet-dnaseq-report.git
-cd quartet-dnaseq-report
+git clone https://github.com/chinese-quartet/quartet-dseqc-report.git
+cd quartet-dnaseq-report/report
 # You don't need to rerun the installation every time you make an edit (though you still do if you change anything in setup.py).
 python setup.py develop
 ```
