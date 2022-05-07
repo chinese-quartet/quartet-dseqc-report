@@ -153,9 +153,11 @@
 
 (defn list-dirs
   [path]
-  (let [{:keys [protocol bucket prefix]} (parse-path path)]
-    (map #(format "%s://%s/%s" protocol bucket (:key %)) 
-         (remote-fs/with-conn protocol (remote-fs/list-objects bucket prefix false)))))
+  (if (fs-service? path)
+    (let [{:keys [protocol bucket prefix]} (parse-path path)]
+      (map #(format "%s://%s/%s" protocol bucket (:key %))
+           (remote-fs/with-conn protocol (remote-fs/list-objects bucket prefix false))))
+    (map #(str (.getAbsolutePath %) "/") (filter #(fs-lib/directory? %) (fs-lib/list-dir path)))))
 
 (defn list-files
   "Local path must not contain file:// prefix. options - directory | file"
