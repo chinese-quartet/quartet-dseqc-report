@@ -92,9 +92,8 @@ class MultiqcModule(BaseMultiqcModule):
         <div class='small-12 columns'>
         <h3 class='section-header black'>Contact us</h3>
           <b>Fudan University Pharmacogenomics Research Center</b>
-          <li>Project manager: Ren Luyao</li>
-          <li>Phone: 15200852771</li>
-          <li>Email: 18110700050@fudan.edu.cn</li>
+          <li>Project manager: Quartet Team</li>
+          <li>Email: quartet@fudan.edu.cn</li>
         </div>
       </div>
 
