@@ -323,7 +323,7 @@ class MultiqcModule(BaseMultiqcModule):
 
       **Four levels of performance:**
       
-      Based on the scaled total score, the submitted data will be ranked together with all Quarte historical datasets. The higher the score, the higher the ranking. After this, the performance levels will be assigned based on their ranking ranges.
+      Based on the scaled total score, the submitted data will be ranked together with all Quartet historical datasets. The higher the score, the higher the ranking. After this, the performance levels will be assigned based on their ranking ranges.
 
       * _Bad_ - the bottom 20%.
       * _Fair_ - between bottom 20% and median 50%.
