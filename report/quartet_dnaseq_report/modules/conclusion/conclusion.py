@@ -174,7 +174,7 @@ class MultiqcModule(BaseMultiqcModule):
     
     fig_data = df[['sample', 'group', 'snv_f1', 'snv_mendelian']]
     fig_data.columns = ['Batch', 'Group', 'F1-score', 'Mendelian Concordance Rate']
-    self.plot_mcr_f1_scatter('snv_performance', fig_data, title='SNV Performance', section_name='Performance of SNV and INDELs', description = """Due to the apparent differences between SNV and INDEL, the performance of the two types of small variants of the evaluated data compared to the Quartet historical batches is shown separately in this section. Each data point represents a set of Quartet samples, i.e., one each of D5, D6, F7, and M8.""")
+    self.plot_mcr_f1_scatter('snv_performance', fig_data, title='SNV Performance', section_name='Performance of SNV and INDEL', description = """Due to the apparent differences between SNV and INDEL, the performance of the two types of small variants of the evaluated data compared to the Quartet historical batches is shown separately in this section. Each data point represents a set of Quartet samples, i.e., one each of D5, D6, F7, and M8.""")
     fig_data = df[['sample', 'group', 'indel_f1', 'indel_mendelian']]
     fig_data.columns = ['Batch', 'Group', 'F1-score', 'Mendelian Concordance Rate']
     self.plot_mcr_f1_scatter('indel_performance', fig_data, title='INDEL Performance', section_name='', description='')
@@ -312,18 +312,18 @@ class MultiqcModule(BaseMultiqcModule):
       name = 'Evaluation metrics',
       anchor = id + '_anchor',
       description = """
-      The submitted data can be divided into 4 levels based on the Quartile Index of the metrics scores by comparing with historical batches: <span style="color: #b80d0d;font-weight:bold">Bad</span>, <span style="color: #d97c11;font-weight:bold">Fair</span>, <span style="color: #70c402;font-weight:bold">Good</span>, <span style="color: #0f9115;font-weight:bold">Great</span>.<br>
+      The performance of the submitted data will be graded as <span style="color: #b80d0d;font-weight:bold">Bad</span>, <span style="color: #d97c11;font-weight:bold">Fair</span>, <span style="color: #70c402;font-weight:bold">Good</span>, or <span style="color: #0f9115;font-weight:bold">Great</span> based on the ranking by comparing the total score with the historical datasets.<br>The total score is an F0.5-measure of the SNV score and the INDEL score, which are the mean values of Precision, Recall, and MCR, respectively.
       """,
       plot = overview_html + '\n' + table_html,
       helptext = helptext if helptext else '''
       **Evaluation metrics:**
       
-      * The total score is F0.5-measure of the respective SNV and INDEL scores, which are the mean values of Precision, Recall, and MCR. The total score along with the specific results for each evaluation metrics are presented in the table below.
+      * The total score is an F0.5-measure of the SNV score and the INDEL score, which are the mean values of Precision, Recall, and MCR, respectively. The total score and the results of the evaluation metrics are presented in the table below.
       * For better comparison and presentation, the total score was scaled to the interval [1, 10], with the worst dataset being 1 and the best dataset scoring 10.
 
       **Four levels of performance:**
       
-      Based on the scaled total score, the evaluated dataset will be ranked together with all Quarte historical datasets. The higher the score, the higher the ranking. After this, the performance levels will be assigned based on their ranking ranges.
+      Based on the scaled total score, the submitted data will be ranked together with all Quartet historical datasets. The higher the score, the higher the ranking. After this, the performance levels will be assigned based on their ranking ranges.
 
       * _Bad_ - the bottom 20%.
       * _Fair_ - between bottom 20% and median 50%.
