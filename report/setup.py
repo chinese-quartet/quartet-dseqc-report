@@ -43,7 +43,7 @@ setup(
             'disable_plugin = quartet_dnaseq_report.cli:disable_plugin'
         ],
         'multiqc.templates.v1': [
-            'quartet_dnaseq_report = quartet_dnaseq_report.templates.default'
+            'report_templates = quartet_dnaseq_report.templates.default'
         ]
     },
     classifiers = [
