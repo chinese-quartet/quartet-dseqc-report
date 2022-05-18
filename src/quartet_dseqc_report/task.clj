@@ -76,7 +76,7 @@
     (fs-lib/create-directories! files-keep-dir)
     (if (empty? files-keep)
       (log/warn (format "Cannot find any files with pattern %s, please check your data." fmc-patterns))
-      (dseqc/copy-files! files-keep files-keep-dir {:replace-existing true}))))
+      (dseqc/copy-files! files-keep files-keep-dir {:replace-existing false}))))
 
 (defn copy-files-to-dir
   [data-dir dest-dir]
