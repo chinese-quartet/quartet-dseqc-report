@@ -174,9 +174,11 @@ class MultiqcModule(BaseMultiqcModule):
     
     fig_data = df[['sample', 'group', 'snv_f1', 'snv_mendelian']]
     fig_data.columns = ['Batch', 'Group', 'F1-score', 'Mendelian Concordance Rate']
+    print(fig_data)
     self.plot_mcr_f1_scatter('snv_performance', fig_data, title='SNV Performance', section_name='Performance of SNV and INDEL', description = """Due to the apparent differences between SNV and INDEL, the performance of the two types of small variants of the evaluated data compared to the Quartet historical batches is shown separately in this section. Each data point represents a set of Quartet samples, i.e., one each of D5, D6, F7, and M8.""")
     fig_data = df[['sample', 'group', 'indel_f1', 'indel_mendelian']]
     fig_data.columns = ['Batch', 'Group', 'F1-score', 'Mendelian Concordance Rate']
+    print(fig_data)
     self.plot_mcr_f1_scatter('indel_performance', fig_data, title='INDEL Performance', section_name='', description='')
     
     ### Historical scores
