@@ -105,10 +105,12 @@
       (doseq [subdir subdirs]
         (copy-files-to-dir subdir dest-dir))
       (update-process! task-id 10)
+      (spit log-path (json/write-str {:status "Running" :msg "Download all files sucessfully."}))
       (spit parameters-file (json/write-str parameters))
       (doseq [files-qualimap-tar (dseqc/batch-filter-files dest-dir [".*qualimap.zip"])]
         (dseqc/decompression-tar files-qualimap-tar))
       (update-process! task-id 50)
+      (spit log-path (json/write-str {:status "Running" :msg "Prepare results successfully."}))
       (spit parameters-file (json/write-str {"Report Name" (or (:name parameters) "Quartet QC Report for DNA-Seq")
                                              "Description" (or (:description parameters) "Visualizes Quality Control(QC) Results for Quartet DNA-Seq Data.")
                                              "Report Tool" (format "%s-%s"
@@ -116,13 +118,15 @@
                                                                    (:plugin-version parameters))
                                              "Team" "Quartet Team"
                                              "Date" (date)}))
-      (let [result (dseqc/multiqc dest-dir dest-dir {:template "quartet_dnaseq_report"
+      (let [result (dseqc/multiqc dest-dir dest-dir {:template "report_templates"
                                                      :title "Quartet DNA report"
                                                      :env {:PATH (add-env-to-path "quartet-dseqc-report")}})
             log (json/write-str result)]
         (log/info "Status: " result)
-        (spit log-path log))
-      (update-process! task-id 100)
+        (spit log-path log)
+        (if (= (:status result) "Error")
+          (throw (Exception. (:msg result)))
+          (update-process! task-id 100)))
       (catch Exception e
         (update-process! task-id -1)
         (let [log (json/write-str {:status "Error" :msg (.toString e)})]
