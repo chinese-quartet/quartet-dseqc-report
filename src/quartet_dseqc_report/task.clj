@@ -91,7 +91,7 @@
     (filter-mkdir-copy (format "%s%s" data-dir "call-fastqc_D6") [".*.(zip|html)"] dest-dir "call-fastqc_D6")
     (filter-mkdir-copy (format "%s%s" data-dir "call-fastqc_F7") [".*.(zip|html)"] dest-dir "call-fastqc_F7")
     (filter-mkdir-copy (format "%s%s" data-dir "call-fastqc_M8") [".*.(zip|html)"] dest-dir "call-fastqc_M8")
-    (filter-mkdir-copy (format "%s%s" data-dir "call-merge_mendelian") [".*.txt"] dest-dir "call-merge_mendelian")))
+    (filter-mkdir-copy (format "%s%s" data-dir "call-merge_mendelian") [".*.summary.txt"] dest-dir "call-merge_mendelian")))
 
 (defn make-report!
   "Chaining Pipeline: filter-files -> copy-files -> multiqc."
