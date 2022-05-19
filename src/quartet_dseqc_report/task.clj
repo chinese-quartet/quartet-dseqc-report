@@ -27,10 +27,22 @@
     (update-task! record)))
 
 (defn update-log-process!
-  "Update message into log file and process into database."
-  [log-path coll task-id process]
-  (spit log-path (json/write-str coll))
-  (update-process! task-id process))
+  "Update message into log file and process into database.
+   log-coll: {:msg \"xxx\" :status \"Failed\"}"
+  [log-path log-coll task-id process]
+  (log/info (:status log-coll)
+            (format "%s... (More details on %s)"
+                    (apply str (take 100 (:msg log-coll)))
+                    log-path))
+  (let [exists? (fs-lib/exists? log-path)
+        results (if exists?
+                  [(json/read-str (slurp log-path) :key-fn keyword) log-coll]
+                  [log-coll])
+        status (:status (last results))
+        msg (apply str (map :msg results))]
+    ;; (println results status msg)
+    (spit log-path (json/write-str {:status status :msg msg}))
+    (update-process! task-id process)))
 
 (defn post-handler
   [{:keys [body owner plugin-context uuid workdir]
@@ -104,13 +116,12 @@
     (try
       (doseq [subdir subdirs]
         (copy-files-to-dir subdir dest-dir))
-      (update-process! task-id 10)
-      (spit log-path (json/write-str {:status "Running" :msg "Download all files sucessfully."}))
+      (update-log-process! log-path {:status "Running" :msg "Download all files sucessfully.\n"} task-id 10)
       (spit parameters-file (json/write-str parameters))
       (doseq [files-qualimap-tar (dseqc/batch-filter-files dest-dir [".*qualimap.zip"])]
         (dseqc/decompression-tar files-qualimap-tar))
+      (update-log-process! log-path {:status "Running" :msg "Prepare results successfully.\n"} task-id 50)
       (update-process! task-id 50)
-      (spit log-path (json/write-str {:status "Running" :msg "Prepare results successfully."}))
       (spit parameters-file (json/write-str {"Report Name" (or (:name parameters) "Quartet QC Report for DNA-Seq")
                                              "Description" (or (:description parameters) "Visualizes Quality Control(QC) Results for Quartet DNA-Seq Data.")
                                              "Report Tool" (format "%s-%s"
@@ -120,18 +131,12 @@
                                              "Date" (date)}))
       (let [result (dseqc/multiqc dest-dir dest-dir {:template "report_templates"
                                                      :title "Quartet DNA report"
-                                                     :env {:PATH (add-env-to-path "quartet-dseqc-report")}})
-            log (json/write-str result)]
-        (log/info "Status: " result)
-        (spit log-path log)
+                                                     :env {:PATH (add-env-to-path "quartet-dseqc-report")}})]
         (if (= (:status result) "Error")
           (throw (Exception. (:msg result)))
-          (update-process! task-id 100)))
+          (update-log-process! log-path result task-id 100)))
       (catch Exception e
-        (update-process! task-id -1)
-        (let [log (json/write-str {:status "Error" :msg (.toString e)})]
-          (log/info "Status: " log)
-          (spit log-path log))))))
+        (update-log-process! log-path {:status "Error" :msg (.toString e)} task-id -1)))))
 
 (def events-init
   "Automatically called during startup; start event listener for quartet_dseqc_report events."
