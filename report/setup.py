@@ -21,7 +21,7 @@ setup(
     packages = find_packages(),
     include_package_data = True,
     install_requires = [
-        'multiqc==1.11',
+        'multiqc==1.12',
         'plotly==4.9.0',
         'pandas==1.2.4',
         'seaborn==0.11.2',
