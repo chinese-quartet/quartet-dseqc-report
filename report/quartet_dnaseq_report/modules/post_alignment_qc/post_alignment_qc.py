@@ -97,7 +97,7 @@ class MultiqcModule(BaseMultiqcModule):
         covs = [str(i) for i in covs]
         log.debug('Custom Qualimap thresholds: {}'.format(', '.join([i for i in covs])))
       except (AttributeError, TypeError, AssertionError):
-        covs = [1, 5, 10, 30, 50]
+        covs = [1, 5, 10, 20, 30, 50]
         covs = [str(i) for i in covs]
         log.debug('Using default Qualimap thresholds: {}'.format(', '.join([i for i in covs])))
       self.covs = covs
@@ -167,7 +167,7 @@ class MultiqcModule(BaseMultiqcModule):
       'scale': 'Blues'
     }
      
-    for c in [1,5,10,30]:
+    for c in [1,5,10,20,30,50]:
       headers['PCT_{}X'.format(c)] = {
         'title': '&ge; {}X'.format(c),
         'description': 'Fraction of genome with at least {}X coverage'.format(c),
