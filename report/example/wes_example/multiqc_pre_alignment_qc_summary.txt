@@ -1,0 +1,9 @@
+Sample	pre_alignment_qc_summary_Dup	pre_alignment_qc_summary_GC	pre_alignment_qc_summary_Total_Sequences_million	pre_alignment_qc_summary_Human	pre_alignment_qc_summary_EColi	pre_alignment_qc_summary_Adapter	pre_alignment_qc_summary_Vector	pre_alignment_qc_summary_rRNA	pre_alignment_qc_summary_Virus	pre_alignment_qc_summary_Yeast	pre_alignment_qc_summary_Mitoch	pre_alignment_qc_summary_No_hits
+R21045930-pool-1-dVF1-D5-1_combined_test_qdp_wes_rly_20221109_2_LCL5_R1	15.16	52.0	13.45	99.69	0.0	3.54	3.88	0.02	0.24	0.11	0.02	0.28
+R21045930-pool-1-dVF1-D5-1_combined_test_qdp_wes_rly_20221109_2_LCL5_R2	14.84	52.0	13.45	99.37	0.0	2.77	3.21	0.02	0.3	0.13	0.02	0.57
+R21045930-pool-1-dVF1-D6-1_combined_test_qdp_wes_rly_20221109_2_LCL6_R1	15.77	52.0	14.17	99.69	0.0	3.05	3.38	0.02	0.23	0.11	0.01	0.28
+R21045930-pool-1-dVF1-D6-1_combined_test_qdp_wes_rly_20221109_2_LCL6_R2	15.46	52.0	14.17	99.37	0.0	2.23	3.19	0.02	0.31	0.14	0.01	0.56
+R21045930-pool-1-dVF1-F7-1_combined_test_qdp_wes_rly_20221109_2_LCL7_R1	19.07	51.0	19.05	99.71	0.0	2.29	2.57	0.02	0.22	0.11	0.02	0.27
+R21045930-pool-1-dVF1-F7-1_combined_test_qdp_wes_rly_20221109_2_LCL7_R2	18.68	51.0	19.05	99.3	0.0	1.98	2.53	0.02	0.3	0.14	0.02	0.64
+R21045933-pool-4-dVF1-M8-1_combined_test_qdp_wes_rly_20221109_2_LCL8_R1	19.91	51.0	23.27	99.69	0.0	2.68	3.28	0.02	0.23	0.11	0.03	0.27
+R21045933-pool-4-dVF1-M8-1_combined_test_qdp_wes_rly_20221109_2_LCL8_R2	19.65	51.0	23.27	99.4	0.0	2.26	3.07	0.02	0.3	0.13	0.03	0.53

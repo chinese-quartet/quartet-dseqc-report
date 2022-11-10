@@ -1,0 +1,5 @@
+Sample	variant_calling_qc_details_SNV_number	variant_calling_qc_details_SNV_precision	variant_calling_qc_details_SNV_recall	variant_calling_qc_details_SNV_F1	variant_calling_qc_details_INDEL_number	variant_calling_qc_details_INDEL_precision	variant_calling_qc_details_INDEL_recall	variant_calling_qc_details_INDEL_F1
+LCL5_D5_DNA_R1_FIMM_S3_L004_hc	3996629	0.9969	0.9983	0.9975995088211707	950359	0.9835	0.9859	0.9846985376256727
+LCL6_D6_DNA_R1_FIMM_S4_L004_hc	3990835	0.9968	0.9983	0.9975494361184903	948418	0.9837	0.9856	0.9846490834306607
+LCL7_F7_DNA_R1_FIMM_S5_L004_hc	3954687	0.9966	0.9979	0.9972495763349212	928513	0.9825	0.983	0.9827499364029508
+LCL8_M8_DNA_R1_FIMM_S6_L004_hc	3970488	0.9968	0.998	0.9973996390615599	935476	0.9818	0.9818	0.9818

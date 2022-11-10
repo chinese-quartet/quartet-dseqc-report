@@ -20,7 +20,7 @@ log = logging.getLogger('multiqc')
 
 class MultiqcModule(BaseMultiqcModule):
   def __init__(self):
-        
+    
     # Halt execution if we've disabled the plugin
     if config.kwargs.get('disable_plugin', True):
       return None
@@ -52,6 +52,10 @@ class MultiqcModule(BaseMultiqcModule):
         n = n + 1
         f_p = '%s/%s' % (f['root'], f['fn'])
         tmp_df = pd.read_csv(f_p, sep='\t')
+        if 'SNV F1' not in tmp_df.columns.to_list():
+          quartet_ref = quartet_ref[quartet_ref.seq == 'WGS'].drop(columns=['seq'])
+        else:
+          quartet_ref = quartet_ref[quartet_ref.seq == 'WES'].drop(columns=['seq'])
         tmp_df[['SNV precision', 'INDEL precision', 'SNV recall', 'INDEL recall']] = round(tmp_df[['SNV precision', 'INDEL precision', 'SNV recall', 'INDEL recall']]/100, 4)
         one_set = ['Queried_Data_Set%s' % n, 'Queried', 'Queried_Data']
         for index, row in tmp_df.iterrows():
@@ -174,11 +178,11 @@ class MultiqcModule(BaseMultiqcModule):
     
     fig_data = df[['sample', 'group', 'snv_f1', 'snv_mendelian']]
     fig_data.columns = ['Batch', 'Group', 'F1-score', 'Mendelian Concordance Rate']
-    print(fig_data)
+    # print(fig_data)
     self.plot_mcr_f1_scatter('snv_performance', fig_data, title='SNV Performance', section_name='Performance of SNV and INDEL', description = """Due to the apparent differences between SNV and INDEL, the performance of the two types of small variants of the evaluated data compared to the Quartet historical batches is shown separately in this section. Each data point represents a set of Quartet samples, i.e., one each of D5, D6, F7, and M8.""")
     fig_data = df[['sample', 'group', 'indel_f1', 'indel_mendelian']]
     fig_data.columns = ['Batch', 'Group', 'F1-score', 'Mendelian Concordance Rate']
-    print(fig_data)
+    # print(fig_data)
     self.plot_mcr_f1_scatter('indel_performance', fig_data, title='INDEL Performance', section_name='', description='')
     
     ### Historical scores
@@ -198,14 +202,14 @@ class MultiqcModule(BaseMultiqcModule):
     a = 1
     b = 10
     score_raw_ref = overview_data[overview_data['batch'] != 'Queried_Data'].total.to_list()
-    print(score_raw_ref)
+    # print(score_raw_ref)
     score_raw = overview_data.total.to_list()
     k = (b-a)/(max(score_raw_ref)-min(score_raw_ref))
     score_norm = []
     for s in score_raw:
       score_norm.append(round(a + k * (s - min(score_raw_ref)), 2))
     overview_data.insert(0, 'total_score_norm', score_norm)
-    print(score_norm); print(score_raw); print(overview_data)
+    # print(score_norm); print(score_raw); print(overview_data)
     Q1 = round(a + k * (quantile_df.loc['Q1', 'total'] - min(score_raw_ref)), 2)
     Q2 = round(a + k * (quantile_df.loc['Q2', 'total'] - min(score_raw_ref)), 2)
     Q3 = round(a + k * (quantile_df.loc['Q3', 'total'] - min(score_raw_ref)), 2)
@@ -236,7 +240,7 @@ class MultiqcModule(BaseMultiqcModule):
     tick_Q1 = "%.2f%s" % (bad_len-0.8, '%')
     tick_Q2 = "%.2f%s" % (bad_len+fair_len-1, '%')
     tick_Q3 = "%.2f%s" % (bad_len+fair_len+good_len-1, '%')
-    print(tick_Q1, tick_Q2, tick_Q3)
+    # print(tick_Q1, tick_Q2, tick_Q3)
     overview_html = """
     <!-- Arrow -->
     <div class="arrow" style="width: {queried}; margin-top:10px; height: 35px;">
