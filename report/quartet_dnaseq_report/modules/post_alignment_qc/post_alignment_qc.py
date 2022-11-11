@@ -177,6 +177,21 @@ class MultiqcModule(BaseMultiqcModule):
         'scale': 'YlOrRd'
       }
     
+    headers['Fold-80'] = {
+      'title': 'Fold-80',
+      'description': 'The Fold-80 base penalty metric is one way to assess coverage uniformity.',
+      'min': 1
+    }
+    
+    headers['On target bases rate'] = {
+      'title': '% On-target base',
+      'description': 'The on-target rate provides information about the specificity of the target enrichment experiment.',
+      'max': 100,
+      'min': 0,
+      'suffix': '%',
+      'scale': 'Oranges'
+    }
+    
     table_config = {
       'namespace': 'post_alignment_qc_summary',
       'id': id,

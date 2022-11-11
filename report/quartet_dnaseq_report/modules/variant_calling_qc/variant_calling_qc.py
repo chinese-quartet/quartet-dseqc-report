@@ -45,9 +45,13 @@ class MultiqcModule(BaseMultiqcModule):
     
     snv_indel_df = snv_indel_df.reset_index(drop=True)
     # Generate F1-score
-    snv_indel_df['SNV F1-score'] = 2*snv_indel_df['SNV precision']*snv_indel_df['SNV recall']/(snv_indel_df['SNV precision']+snv_indel_df['SNV recall'])
-    snv_indel_df['INDEL F1-score'] = 2*snv_indel_df['INDEL precision']*snv_indel_df['INDEL recall']/(snv_indel_df['INDEL precision']+snv_indel_df['INDEL recall'])
-
+    if 'SNV F1' not in snv_indel_df.columns.to_list():
+      snv_indel_df['SNV F1'] = 2*snv_indel_df['SNV precision']*snv_indel_df['SNV recall']/(snv_indel_df['SNV precision']+snv_indel_df['SNV recall'])
+      snv_indel_df['INDEL F1'] = 2*snv_indel_df['INDEL precision']*snv_indel_df['INDEL recall']/(snv_indel_df['INDEL precision']+snv_indel_df['INDEL recall'])
+    else:
+      snv_indel_df['SNV F1'] = snv_indel_df['SNV F1']/100
+      snv_indel_df['INDEL F1'] = snv_indel_df['INDEL F1']/100
+    
     ### SUMMARY TABLE 2
     mendelian_df = pd.DataFrame()
     n = 1
@@ -117,71 +121,119 @@ class MultiqcModule(BaseMultiqcModule):
 
     headers = OrderedDict()
     headers['SNV number'] = {
-      'title': 'SNV Num',
-      'description': 'SNV Total Number',
+      'title': 'SNV num',
+      'description': 'SNV total number',
       'scale': False
     }
-
+    
+    headers['SNV query'] = {
+      'title': 'SNV query',
+      'description': 'The intersection loci between the capture region and the high confidence interval',
+      'scale': False
+    }
+    
+    headers['SNV TP'] = {
+      'title': 'SNV TP',
+      'description': 'The number of detected SNVs that are consistent with reference dataset',
+      'scale': False
+    }
+    
+    headers['SNV FP'] = {
+      'title': 'SNV FP',
+      'description': 'The number of detected SNVs that are not mutated in the reference dataset',
+      'scale': False
+    }
+    
+    headers['SNV FN'] = {
+      'title': 'SNV FN',
+      'description': 'The number of SNVs not detected but validated in reference dataset',
+      'scale': False
+    }
+    
     headers['SNV precision'] = {
       'title': 'SNV precision',
-      'description': 'SNV Precision',
+      'description': 'SNV precision',
       "min": 0,
       "max": 1,
       "scale": "Set3",
       'format': '{:,.4f}'
     }
-
+    
     headers['SNV recall'] = {
       'title': 'SNV recall',
-      'description': 'SNV Recall',
+      'description': 'SNV recall',
       "min": 0,
       "max": 1,
       "scale": "Set2",
       'format': '{:,.4f}'
     }
-
-    headers['SNV F1-score'] = {
-      'title': 'SNV F1-score',
-      'description': 'SNV F1-score',
+    
+    headers['SNV F1'] = {
+      'title': 'SNV F1',
+      'description': 'SNV F1',
       "min": 0,
       "max": 1,
       "scale": "Spectral",
       'format': '{:,.4f}'
     }
-
+    
     headers['INDEL number'] = {
-      'title': 'INDEL Num',
-      'description': 'INDEL Total Number',
+      'title': 'INDEL num',
+      'description': 'INDEL total number',
+      'scale': False
+    }
+    
+    headers['INDEL query'] = {
+      'title': 'INDEL query',
+      'description': 'The intersection loci between the capture region and the high confidence interval',
+      'scale': False
+    }
+    
+    headers['INDEL TP'] = {
+      'title': 'INDEL TP',
+      'description': 'The number of detected INDELs that are consistent with reference dataset',
+      'scale': False
+    }
+    
+    headers['INDEL FP'] = {
+      'title': 'INDEL FP',
+      'description': 'The number of detected INDELs that are not mutated in the reference dataset',
+      'scale': False
+    }
+    
+    headers['INDEL FN'] = {
+      'title': 'INDEL FN',
+      'description': 'The number of INDELs not detected but validated in reference dataset',
       'scale': False
     }
     
     headers['INDEL precision'] = {
       'title': 'INDEL precision',
-      'description': 'INDEL Precision',
+      'description': 'INDEL precision',
       "min": 0,
       "max": 1,
       "scale": "RdYlGn-rev",
       'format': '{:,.4f}'
     }
-
+    
     headers['INDEL recall'] = {
       'title': 'INDEL recall',
-      'description': 'INDEL Recall',
+      'description': 'INDEL recall',
       "min": 0,
       "max": 1,
       "scale": "YlGnBu",
       'format': '{:,.4f}'
     }
-
-    headers['INDEL F1-score'] = {
-      'title': 'INDEL F1-score',
-      'description': 'INDEL F1-score',
+    
+    headers['INDEL F1'] = {
+      'title': 'INDEL F1',
+      'description': 'INDEL F1',
       "min": 0,
       "max": 1,
       "scale": "YlGn",
       'format': '{:,.4f}'
     }
-
+    
     table_config = {
       'namespace': 'variant_calling_qc_details',
       'id': id,

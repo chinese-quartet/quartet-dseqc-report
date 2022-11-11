@@ -1,0 +1,5 @@
+Sample	post_alignment_qc_summary_Mapping	post_alignment_qc_summary_Mismatch_Rate	post_alignment_qc_summary_Mendelian_Insert_Size	post_alignment_qc_summary_Median_Coverage	post_alignment_qc_summary_PCT_1X	post_alignment_qc_summary_PCT_5X	post_alignment_qc_summary_PCT_10X	post_alignment_qc_summary_PCT_20X	post_alignment_qc_summary_PCT_30X	post_alignment_qc_summary_Fold_80	post_alignment_qc_summary_On_target_bases_rate
+R21045930-pool-1-dVF1-D5-1_combined_test_qdp_wes_rly_20221109_2_LCL5	99.96	0.19	207	32	93.38	92.02	90.71	80.37	56.27	1.53	49
+R21045930-pool-1-dVF1-D6-1_combined_test_qdp_wes_rly_20221109_2_LCL6	99.96	0.19	212	35	93.33	92.11	91.1	83.93	63.47	1.44	49
+R21045930-pool-1-dVF1-F7-1_combined_test_qdp_wes_rly_20221109_2_LCL7	99.95	0.19	222	46	93.56	92.52	91.79	88.73	79.86	1.44	49
+R21045933-pool-4-dVF1-M8-1_combined_test_qdp_wes_rly_20221109_2_LCL8	99.96	0.18	210	53	93.79	92.46	91.84	90.33	85.68	1.38	48

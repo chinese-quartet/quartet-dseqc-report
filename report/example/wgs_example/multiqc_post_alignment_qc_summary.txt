@@ -1,0 +1,5 @@
+Sample	post_alignment_qc_summary_Mapping	post_alignment_qc_summary_Mismatch_Rate	post_alignment_qc_summary_Mendelian_Insert_Size	post_alignment_qc_summary_Median_Coverage	post_alignment_qc_summary_PCT_1X	post_alignment_qc_summary_PCT_5X	post_alignment_qc_summary_PCT_10X	post_alignment_qc_summary_PCT_30X
+LCL5_D5_DNA_R1_FIMM_S3_L004	99.65	0.56	444.0	46	97.22	96.57	96.19	93.07
+LCL6_D6_DNA_R1_FIMM_S4_L004	99.61	0.57	450.0	44	97.21	96.55	96.16	91.86
+LCL7_F7_DNA_R1_FIMM_S5_L004	99.57	0.6	466.0	40	97.78	97.08	96.6	84.09
+LCL8_M8_DNA_R1_FIMM_S6_L004	99.45	0.67	459.0	39	97.18	96.51	96.09	86.55

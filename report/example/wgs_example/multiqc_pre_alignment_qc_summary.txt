@@ -1,0 +1,9 @@
+Sample	pre_alignment_qc_summary_Dup	pre_alignment_qc_summary_GC	pre_alignment_qc_summary_Total_Sequences_million	pre_alignment_qc_summary_Human	pre_alignment_qc_summary_EColi	pre_alignment_qc_summary_Adapter	pre_alignment_qc_summary_Vector	pre_alignment_qc_summary_rRNA	pre_alignment_qc_summary_Virus	pre_alignment_qc_summary_Yeast	pre_alignment_qc_summary_Mitoch	pre_alignment_qc_summary_No_hits
+LCL5_D5_DNA_R1_FIMM_S3_L004_R1	33.27	40.0	653.13	98.68	0.0	0.0	0.85	0.08	0.79	0.42	0.16	1.24
+LCL5_D5_DNA_R1_FIMM_S3_L004_R2	32.02	40.0	653.13	97.35	0.0	0.0	0.37	0.08	0.71	0.39	0.15	2.56
+LCL6_D6_DNA_R1_FIMM_S4_L004_R1	32.82	40.0	620.95	98.69	0.0	0.0	0.86	0.06	0.92	0.45	0.11	1.18
+LCL6_D6_DNA_R1_FIMM_S4_L004_R2	31.26	40.0	620.95	97.09	0.0	0.04	0.42	0.07	0.76	0.39	0.1	2.74
+LCL7_F7_DNA_R1_FIMM_S5_L004_R1	31.24	40.0	552.48	98.5	0.0	0.0	0.72	0.06	0.74	0.35	0.16	1.43
+LCL7_F7_DNA_R1_FIMM_S5_L004_R2	30.01	40.0	552.48	96.82	0.0	0.0	0.37	0.05	0.69	0.4	0.16	3.05
+LCL8_M8_DNA_R1_FIMM_S6_L004_R1	30.53	40.0	546.28	98.72	0.0	0.0	0.79	0.05	0.79	0.39	0.13	1.2
+LCL8_M8_DNA_R1_FIMM_S6_L004_R2	27.92	41.0	546.28	96.11	0.0	0.05	0.36	0.05	0.68	0.36	0.12	3.76
