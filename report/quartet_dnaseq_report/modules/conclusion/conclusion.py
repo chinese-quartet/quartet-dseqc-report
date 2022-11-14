@@ -53,9 +53,9 @@ class MultiqcModule(BaseMultiqcModule):
         f_p = '%s/%s' % (f['root'], f['fn'])
         tmp_df = pd.read_csv(f_p, sep='\t')
         if 'SNV F1' not in tmp_df.columns.to_list():
-          quartet_ref = quartet_ref[quartet_ref.seq == 'WGS'].drop(columns=['seq'])
+          quartet_ref = quartet_ref[quartet_ref.seq == 'WGS']
         else:
-          quartet_ref = quartet_ref[quartet_ref.seq == 'WES'].drop(columns=['seq'])
+          quartet_ref = quartet_ref[quartet_ref.seq == 'WES']
         tmp_df[['SNV precision', 'INDEL precision', 'SNV recall', 'INDEL recall']] = round(tmp_df[['SNV precision', 'INDEL precision', 'SNV recall', 'INDEL recall']]/100, 4)
         one_set = ['Queried_Data_Set%s' % n, 'Queried', 'Queried_Data']
         for index, row in tmp_df.iterrows():
@@ -94,6 +94,7 @@ class MultiqcModule(BaseMultiqcModule):
     
     # Merge precision, indel, mendelian
     queried_performance = pr_df.merge(mendelian_df, on=['sample', 'group', 'batch'])
+    quartet_ref = quartet_ref.drop(columns=['seq'])
     queried_performance = queried_performance[quartet_ref.columns]
     # Rows of df takes a set of Quartet samples as a unit
     df = pd.concat([quartet_ref, queried_performance], axis=0)
