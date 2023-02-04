@@ -21,7 +21,7 @@
 (defn usage [options-summary]
   (->> ["DSeQC - Visualizes Quality Control(QC) results for Quartet Project."
         ""
-        "Usage: dseqc [options]"
+        "Usage: quartet-dseqc-report [options]"
         ""
         "Options:"
         options-summary

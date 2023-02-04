@@ -20,6 +20,17 @@
             [lein-shell "0.5.0"]
             [lein-changelog "0.3.2"]]
 
+  :repositories [["official" "https://repo1.maven.org/maven2/"]
+                 ["central" "https://maven.aliyun.com/repository/central"]
+                 ["jcenter" "https://maven.aliyun.com/repository/jcenter"]
+                 ["clojars" "https://mirrors.tuna.tsinghua.edu.cn/clojars/"]
+                 ["clojars-official" "https://repo.clojars.org"]]
+
+  :plugin-repositories [["central" "https://maven.aliyun.com/repository/central"]
+                        ["jcenter" "https://maven.aliyun.com/repository/jcenter"]
+                        ["clojars" "https://mirrors.tuna.tsinghua.edu.cn/clojars/"]
+                        ["clojars-official" "https://repo.clojars.org"]]
+
   :aliases {"update-version" ["shell" "sed" "-i" "" "s/version \"[0-9.]*\"/version \"${:version}\"/" "src/quartet_dseqc_report/version.clj"]
             "update-plugin-version" ["shell" "sed" "-i" "" "s/version: v[0-9.]*/version: v${:version}/" "resources/tservice-plugin.yaml"]}
   :deploy-repositories [["releases" :clojars]]

@@ -111,7 +111,9 @@
   (log/info "Generate quartet dnaseq report: " data-dir parameters dest-dir)
   (let [parameters-file (fs-lib/join-paths dest-dir "general_information.json")
         log-path (fs-lib/join-paths dest-dir "log")
-        subdirs (dseqc/list-dirs data-dir)]
+        subdirs (filter (fn [dir] (not= (clj-str/replace dir #"/$" "") 
+                                        (clj-str/replace dest-dir #"/$" ""))) 
+                        (dseqc/list-dirs data-dir))]
     (log/info "List subdirs: " subdirs)
     (try
       (doseq [subdir subdirs]
