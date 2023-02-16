@@ -1,0 +1,6 @@
+[submodule "wes-workflow"]
+	path = wes-workflow
+	url = http://choppy.3steps.cn/renluyao/quartet_dna_quality_control_wes_big_pipeline.git
+[submodule "wgs-workflow"]
+	path = wgs-workflow
+	url = http://choppy.3steps.cn/renluyao/quartet_dna_quality_control_wgs_big_pipeline.git
