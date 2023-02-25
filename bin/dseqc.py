@@ -26,43 +26,51 @@ def dseqc():
 
 @dseqc.command(help="Run the pipeline for DNA-Seq (WGS/WES) data. You need to specify the --bed-file argument if you want to analyze WES data.")
 @click.option('--d5-r1', required=True, multiple=True,
-              type=click.Path(exists=True, file_okay=True),
+              type=click.Path(exists=True, dir_okay=False, file_okay=True),
               help="D5 Read1 File(s).")
 @click.option('--d5-r2', required=True, multiple=True,
-              type=click.Path(exists=True, file_okay=True),
+              type=click.Path(exists=True, dir_okay=False, file_okay=True),
               help="D5 Read2 File(s).")
 @click.option('--d6-r1', required=True, multiple=True,
-              type=click.Path(exists=True, file_okay=True),
+              type=click.Path(exists=True, dir_okay=False, file_okay=True),
               help="D6 Read1 File(s).")
 @click.option('--d6-r2', required=True, multiple=True,
-              type=click.Path(exists=True, file_okay=True),
+              type=click.Path(exists=True, dir_okay=False, file_okay=True),
               help="D6 Read2 File(s).")
 @click.option('--f7-r1', required=True, multiple=True,
-              type=click.Path(exists=True, file_okay=True),
+              type=click.Path(exists=True, dir_okay=False, file_okay=True),
               help="F7 Read1 File(s).")
 @click.option('--f7-r2', required=True, multiple=True,
-              type=click.Path(exists=True, file_okay=True),
+              type=click.Path(exists=True, dir_okay=False, file_okay=True),
               help="F7 Read2 File(s).")
 @click.option('--m8-r1', required=True, multiple=True,
-              type=click.Path(exists=True, file_okay=True),
+              type=click.Path(exists=True, dir_okay=False, file_okay=True),
               help="M8 Read1 File(s).")
 @click.option('--m8-r2', required=True, multiple=True,
-              type=click.Path(exists=True, file_okay=True),
+              type=click.Path(exists=True, dir_okay=False, file_okay=True),
               help="M8 Read2 File(s).")
 @click.option('--platform', '-p', required=False,
               type=click.Choice(["BGI", "ILLUMINA"]),
               help="Which platform?.")
 @click.option('--bed-file', '-b', required=False,
-              type=click.Path(exists=True, file_okay=True),
+              type=click.Path(exists=True, dir_okay=False, file_okay=True),
               help="A bed file for your wes data.")
 @click.option('--benchmarking-dir', '-B', required=True,
-              type=click.Path(exists=True, dir_okay=True),
+              type=click.Path(exists=True, dir_okay=True, file_okay=False),
               help="A directory which contains reference datasets for benchmarking.")
+@click.option('--reference-data-dir', '-R', required=True,
+              type=click.Path(exists=True, dir_okay=True, file_okay=False),
+              help="A directory which contains reference data files.")
+@click.option('--fastq-screen-dir', '-F', required=True,
+              type=click.Path(exists=True, dir_okay=True, file_okay=False),
+              help="A directory which contains fastq_screen reference files.")
+@click.option('--sentieon-server', '-S', required=True,
+              help="A url for sentieon license server.")
 @click.option('--output-dir', required=False,
-              type=click.Path(exists=True, dir_okay=True),
+              type=click.Path(exists=True, dir_okay=True, file_okay=False),
               help="The output directory.")
 def fq_workflow(d5_r1, d5_r2, d6_r1, d6_r2, f7_r1, f7_r2, m8_r1, m8_r2, 
-                platform, bed_file, output_dir, benchmarking_dir):
+                platform, bed_file, output_dir, benchmarking_dir, fastq_screen_dir, reference_data_dir, sentieon_server):
     for items in [d5_r1, d6_r1, f7_r1, m8_r1]:
         for item in items:
             if not re.match(r'.*_R1.(fastq|fq).gz', item):
@@ -89,6 +97,13 @@ def fq_workflow(d5_r1, d5_r2, d6_r1, d6_r2, f7_r1, f7_r2, m8_r1, m8_r2,
         "pl": platform,
         "fastq_or_vcf": "fastq",
         "benchmarking_dir": benchmarking_dir,
+        "benchmarking_region": os.path.join(benchmarking_dir, "Quartet.high.confidence.region.v202103.bed"),
+        "screen_ref_dir": fastq_screen_dir,
+        "dbsnp_dir": reference_data_dir,
+        "reference_bed_dict": os.path.join(reference_data_dir, "GRCh38.d1.vd1.dict"),
+        "dbmills_dir": reference_data_dir,
+        "ref_dir": reference_data_dir,
+        "SENTIEON_LICENSE": sentieon_server,
         "fastq_1_D5": d5_r1,
         "fastq_2_D5": d5_r2,
         "fastq_1_D6": d6_r1,
@@ -141,10 +156,16 @@ def fq_workflow(d5_r1, d5_r2, d6_r1, d6_r2, f7_r1, f7_r2, m8_r1, m8_r2,
 @click.option('--bed-file', '-b', required=False,
               type=click.Path(exists=True, file_okay=True),
               help="A bed file for your wes data.")
+@click.option('--benchmarking-dir', '-B', required=True,
+              type=click.Path(exists=True, dir_okay=True, file_okay=False),
+              help="A directory which contains reference datasets for benchmarking.")
+@click.option('--reference-data-dir', '-R', required=True,
+              type=click.Path(exists=True, dir_okay=True, file_okay=False),
+              help="A directory which contains reference data files.")
 @click.option('--output-dir', required=False,
               type=click.Path(exists=True, dir_okay=True),
               help="The output directory.")
-def fq_workflow(vcf_d5, vcf_d6, vcf_f7, vcf_m8, platform, bed_file, output_dir):
+def fq_workflow(vcf_d5, vcf_d6, vcf_f7, vcf_m8, platform, bed_file, output_dir, benchmarking_dir, reference_data_dir):
     for items in [vcf_d5, vcf_d6, vcf_f7, vcf_m8]:
         for item in items:
             if not re.match(r'.*.vcf', item):
@@ -164,6 +185,12 @@ def fq_workflow(vcf_d5, vcf_d6, vcf_f7, vcf_m8, platform, bed_file, output_dir):
         "project_name": project_name,
         "platform": platform,
         "fastq_or_vcf": "vcf",
+        "benchmarking_dir": benchmarking_dir,
+        "benchmarking_region": os.path.join(benchmarking_dir, "Quartet.high.confidence.region.v202103.bed"),
+        "dbsnp_dir": reference_data_dir,
+        "reference_bed_dict": os.path.join(reference_data_dir, "GRCh38.d1.vd1.dict"),
+        "dbmills_dir": reference_data_dir,
+        "ref_dir": reference_data_dir,
         "vcf_D5": vcf_d5,
         "vcf_D6": vcf_d6,
         "vcf_F7": vcf_f7,

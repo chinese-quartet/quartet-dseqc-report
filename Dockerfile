@@ -80,6 +80,9 @@ RUN conda-pack -n venv -o /tmp/env.tar && \
 
 RUN /venv/bin/conda-unpack
 
+# Sentieon Genomics
+RUN wget https://s3.amazonaws.com/sentieon-release/software/sentieon-genomics-201911.01.tar.gz && tar xzvf sentieon-genomics-201911.01.tar.gz && mv sentieon-genomics-201911.01 /opt/sentieon-genomics
+
 # ###################
 # # STAGE 2: runner
 # ###################
@@ -88,7 +91,8 @@ FROM adoptopenjdk/openjdk8:x86_64-debianslim-jre8u345-b01 as runner
 
 LABEL org.opencontainers.image.source https://github.com/chinese-quartet/quartet-dseqc-report.git
 
-ENV PATH="$PATH:/venv/bin:/varbenchtools/bin:/opt/conda/bin"
+ENV PATH="$PATH:/venv/bin:/varbenchtools:/opt/conda/bin:/opt/sentieon-genomics/bin"
+ENV LD_LIBRARY_PATH="/varbenchtools/lib/:$LD_LIBRARY_PATH"
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV FC_LANG en-US
 ENV LC_CTYPE en_US.UTF-8
@@ -103,6 +107,7 @@ RUN echo "**** Install dev packages ****" && \
     \
     echo "**** Cleanup ****" && \
     apt-get clean
+
 RUN wget https://repo.anaconda.com/miniconda/Miniconda3-py37_22.11.1-1-Linux-x86_64.sh -O miniconda.sh && bash miniconda.sh -b -p /opt/conda
 RUN /opt/conda/bin/conda install -y python=3.9
 ADD ./resources/requirements.txt /data/requirements.txt
@@ -116,6 +121,8 @@ COPY --from=builder /venv /venv
 COPY --from=builder /app/source/wes-workflow /venv/wes-workflow
 COPY --from=builder /app/source/wgs-workflow /venv/wgs-workflow
 COPY --from=builder /home/varbenchtools /varbenchtools
+COPY --from=builder /opt/sentieon-genomics /opt/sentieon-genomics
+
 
 # Run it
 ENTRYPOINT ["quartet-dseqc-report"]
