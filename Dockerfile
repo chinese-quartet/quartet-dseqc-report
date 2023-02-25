@@ -25,6 +25,8 @@ RUN lein deps
 
 ## add the rest of the source
 ADD . .
+## Fetch all submodule
+RUN git submodule update --init --recursive
 
 ## build the app
 RUN lein uberjar
@@ -72,6 +74,8 @@ RUN wget https://repo.anaconda.com/miniconda/Miniconda3-py37_22.11.1-1-Linux-x86
 RUN /opt/conda/bin/conda install -c conda-forge -c bioconda -c anaconda mamba blas lapack cxx-compiler conda-pack gfortran_linux-64
 ## Note: cromwell==83 must not deleted.
 RUN /opt/conda/bin/mamba create -n venv -c bioconda -c conda-forge -y rtg-tools==3.12.1 hap.py==0.3.14 bedtools==2.27.1 picard==2.25.4 fastqc==0.11.8 multiqc==1.8 fastq-screen==0.13.0 qualimap==2.1.1 cromwell==83
+## For app render.
+RUN /opt/conda/envs/venv/bin/pip install git+https://github.com/yjcyxky/biominer-app-util.git
 
 # Pack the conda environment
 RUN conda-pack -n venv -o /tmp/env.tar && \
@@ -91,7 +95,7 @@ FROM adoptopenjdk/openjdk8:x86_64-debianslim-jre8u345-b01 as runner
 
 LABEL org.opencontainers.image.source https://github.com/chinese-quartet/quartet-dseqc-report.git
 
-ENV PATH="$PATH:/venv/bin:/varbenchtools:/opt/conda/bin:/opt/sentieon-genomics/bin"
+ENV PATH="/venv/bin:/varbenchtools:/opt/conda/bin:/opt/sentieon-genomics/bin:$PATH"
 ENV LD_LIBRARY_PATH="/varbenchtools/lib/:$LD_LIBRARY_PATH"
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV FC_LANG en-US
@@ -111,6 +115,7 @@ RUN echo "**** Install dev packages ****" && \
 RUN wget https://repo.anaconda.com/miniconda/Miniconda3-py37_22.11.1-1-Linux-x86_64.sh -O miniconda.sh && bash miniconda.sh -b -p /opt/conda
 RUN /opt/conda/bin/conda install -y python=3.9
 ADD ./resources/requirements.txt /data/requirements.txt
+ADD ./bin/dseqc.py /opt/conda/envs/venv/bin/dseqc.py
 ADD ./bin/quartet-dseqc-report /opt/conda/bin/quartet-dseqc-report
 RUN /opt/conda/bin/pip install -r /data/requirements.txt
 
@@ -123,6 +128,8 @@ COPY --from=builder /app/source/wgs-workflow /venv/wgs-workflow
 COPY --from=builder /home/varbenchtools /varbenchtools
 COPY --from=builder /opt/sentieon-genomics /opt/sentieon-genomics
 
+## Config file for cromwell instance
+COPY --from=builder /app/source/build/cromwell-local.conf /venv/cromwell-local.conf
 
 # Run it
-ENTRYPOINT ["quartet-dseqc-report"]
+ENTRYPOINT ["dseqc.py"]
