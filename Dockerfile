@@ -11,6 +11,9 @@ ENV PATH="$PATH:/opt/conda/bin:/opt/conda/envs/venv/bin"
 ENV FC_LANG en-US
 ENV LC_CTYPE en_US.UTF-8
 
+# For a set of softwares which can be installed by conda
+RUN apt-get update && apt-get install -y coreutils bash git wget make gettext
+
 # For quartet-dseqc-report
 ## lein:    backend dependencies and building
 ADD ./bin/lein /usr/local/bin/lein
@@ -53,9 +56,6 @@ WORKDIR /home/htslib-1.6
 RUN ./configure
 RUN make
 RUN make install
-
-# For a set of softwares which can be installed by conda
-RUN apt-get update && apt-get install -y coreutils bash git wget make gettext
 
 ## Add vbt folder
 RUN git clone https://github.com/sbg/VBT-TrioAnalysis.git /home/varbenchtools
