@@ -73,7 +73,7 @@ RUN ldconfig
 RUN wget https://repo.anaconda.com/miniconda/Miniconda3-py37_22.11.1-1-Linux-x86_64.sh -O miniconda.sh && bash miniconda.sh -b -p /opt/conda
 RUN /opt/conda/bin/conda install -c conda-forge -c bioconda -c anaconda mamba blas lapack cxx-compiler conda-pack gfortran_linux-64
 ## Note: cromwell==83 must not deleted.
-RUN /opt/conda/bin/mamba create -n venv -c bioconda -c conda-forge -y rtg-tools==3.12.1 hap.py==0.3.14 bedtools==2.27.1 picard==2.25.4 fastqc==0.11.8 multiqc==1.8 fastq-screen==0.13.0 qualimap==2.1.1 cromwell==83
+RUN /opt/conda/bin/mamba create -n venv -c bioconda -c conda-forge -y python=3.9 rtg-tools==3.12.1 hap.py==0.3.14 bedtools==2.27.1 picard==2.25.4 fastqc==0.11.8 multiqc==1.8 fastq-screen==0.13.0 qualimap==2.1.1 cromwell==83
 ## For app render.
 RUN /opt/conda/envs/venv/bin/pip install git+https://github.com/yjcyxky/biominer-app-util.git
 
