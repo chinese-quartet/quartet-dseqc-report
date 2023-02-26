@@ -165,7 +165,7 @@ def fq_workflow(d5_r1, d5_r2, d6_r1, d6_r2, f7_r1, f7_r2, m8_r1, m8_r2,
 @click.option('--output-dir', required=False,
               type=click.Path(exists=True, dir_okay=True),
               help="The output directory.")
-def fq_workflow(vcf_d5, vcf_d6, vcf_f7, vcf_m8, platform, bed_file, output_dir, benchmarking_dir, reference_data_dir):
+def vcf_workflow(vcf_d5, vcf_d6, vcf_f7, vcf_m8, platform, bed_file, output_dir, benchmarking_dir, reference_data_dir):
     for items in [vcf_d5, vcf_d6, vcf_f7, vcf_m8]:
         for item in items:
             if not re.match(r'.*.vcf', item):

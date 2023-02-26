@@ -116,7 +116,7 @@ RUN /opt/conda/bin/conda install -y python=3.9
 ## For app render.
 RUN /opt/conda/bin/pip install git+https://github.com/yjcyxky/biominer-app-util.git
 ADD ./resources/requirements.txt /data/requirements.txt
-ADD ./bin/dseqc.py /opt/conda/envs/venv/bin/dseqc.py
+ADD ./bin/dseqc.py /opt/conda/bin/dseqc.py
 ADD ./bin/quartet-dseqc-report /opt/conda/bin/quartet-dseqc-report
 RUN /opt/conda/bin/pip install -r /data/requirements.txt
 
