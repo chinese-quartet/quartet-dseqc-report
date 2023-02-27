@@ -25,33 +25,33 @@ def dseqc():
 
 
 @dseqc.command(help="Run the pipeline for DNA-Seq (WGS/WES) data. You need to specify the --bed-file argument if you want to analyze WES data.")
-@click.option('--d5-r1', required=True, multiple=True,
+@click.option('--d5-r1', required=True, multiple=False,
               type=click.Path(exists=True, dir_okay=False, file_okay=True),
-              help="D5 Read1 File(s).")
-@click.option('--d5-r2', required=True, multiple=True,
+              help="D5 Read1 File.")
+@click.option('--d5-r2', required=True, multiple=False,
               type=click.Path(exists=True, dir_okay=False, file_okay=True),
-              help="D5 Read2 File(s).")
-@click.option('--d6-r1', required=True, multiple=True,
+              help="D5 Read2 File.")
+@click.option('--d6-r1', required=True, multiple=False,
               type=click.Path(exists=True, dir_okay=False, file_okay=True),
-              help="D6 Read1 File(s).")
-@click.option('--d6-r2', required=True, multiple=True,
+              help="D6 Read1 File.")
+@click.option('--d6-r2', required=True, multiple=False,
               type=click.Path(exists=True, dir_okay=False, file_okay=True),
-              help="D6 Read2 File(s).")
-@click.option('--f7-r1', required=True, multiple=True,
+              help="D6 Read2 File.")
+@click.option('--f7-r1', required=True, multiple=False,
               type=click.Path(exists=True, dir_okay=False, file_okay=True),
-              help="F7 Read1 File(s).")
-@click.option('--f7-r2', required=True, multiple=True,
+              help="F7 Read1 File.")
+@click.option('--f7-r2', required=True, multiple=False,
               type=click.Path(exists=True, dir_okay=False, file_okay=True),
-              help="F7 Read2 File(s).")
-@click.option('--m8-r1', required=True, multiple=True,
+              help="F7 Read2 File.")
+@click.option('--m8-r1', required=True, multiple=False,
               type=click.Path(exists=True, dir_okay=False, file_okay=True),
-              help="M8 Read1 File(s).")
-@click.option('--m8-r2', required=True, multiple=True,
+              help="M8 Read1 File.")
+@click.option('--m8-r2', required=True, multiple=False,
               type=click.Path(exists=True, dir_okay=False, file_okay=True),
-              help="M8 Read2 File(s).")
+              help="M8 Read2 File.")
 @click.option('--platform', '-p', required=False,
               type=click.Choice(["BGI", "ILLUMINA"]),
-              help="Which platform?.")
+              help="Which platform?.", default="ILLUMINA")
 @click.option('--bed-file', '-b', required=False,
               type=click.Path(exists=True, dir_okay=False, file_okay=True),
               help="A bed file for your wes data.")
@@ -71,17 +71,15 @@ def dseqc():
               help="The output directory.")
 def fq_workflow(d5_r1, d5_r2, d6_r1, d6_r2, f7_r1, f7_r2, m8_r1, m8_r2, 
                 platform, bed_file, output_dir, benchmarking_dir, fastq_screen_dir, reference_data_dir, sentieon_server):
-    for items in [d5_r1, d6_r1, f7_r1, m8_r1]:
-        for item in items:
-            if not re.match(r'.*_R1.(fastq|fq).gz', item):
-                raise Exception(
-                    "The file (%s) must be with suffixes of _R1.fastq.gz or _R1.fq.gz" % item)
+    for item in [d5_r1, d6_r1, f7_r1, m8_r1]:
+        if not re.match(r'.*_R1.(fastq|fq).gz', item):
+            raise Exception(
+                "The file (%s) must be with suffixes of _R1.fastq.gz or _R1.fq.gz" % item)
             
-    for items in [d5_r2, d6_r2, f7_r2, m8_r2]:
-        for item in items:
-            if not re.match(r'.*_R2.(fastq|fq).gz', item):
-                raise Exception(
-                    "The file (%s) must be with suffixes of _R2.fastq.gz or _R2.fq.gz" % item)        
+    for item in [d5_r2, d6_r2, f7_r2, m8_r2]:
+        if not re.match(r'.*_R2.(fastq|fq).gz', item):
+            raise Exception(
+                "The file (%s) must be with suffixes of _R2.fastq.gz or _R2.fq.gz" % item)        
 
     if bed_file:
         wdl_dir = '/venv/wes_workflow'
@@ -138,21 +136,21 @@ def fq_workflow(d5_r1, d5_r2, d6_r1, d6_r2, f7_r1, f7_r2, m8_r1, m8_r2,
 
 
 @dseqc.command(help="Run the pipeline for DNA-Seq data.")
-@click.option('--vcf-d5', required=True, multiple=True,
+@click.option('--vcf-d5', required=True, multiple=False,
               type=click.Path(exists=True, file_okay=True),
               help="D5 VCF Files.")
-@click.option('--vcf-d6', required=True, multiple=True,
+@click.option('--vcf-d6', required=True, multiple=False,
               type=click.Path(exists=True, file_okay=True),
               help="D6 VCF Files.")
-@click.option('--vcf-f7', required=True, multiple=True,
+@click.option('--vcf-f7', required=True, multiple=False,
               type=click.Path(exists=True, file_okay=True),
               help="F7 VCF Files.")
-@click.option('--vcf-m8', required=True, multiple=True,
+@click.option('--vcf-m8', required=True, multiple=False,
               type=click.Path(exists=True, file_okay=True),
               help="M8 VCF Files.")
 @click.option('--platform', '-p', required=False,
               type=click.Choice(["BGI", "ILLUMINA"]),
-              help="Which platform?.")
+              help="Which platform?.", default="ILLUMINA")
 @click.option('--bed-file', '-b', required=False,
               type=click.Path(exists=True, file_okay=True),
               help="A bed file for your wes data.")
@@ -166,11 +164,10 @@ def fq_workflow(d5_r1, d5_r2, d6_r1, d6_r2, f7_r1, f7_r2, m8_r1, m8_r2,
               type=click.Path(exists=True, dir_okay=True),
               help="The output directory.")
 def vcf_workflow(vcf_d5, vcf_d6, vcf_f7, vcf_m8, platform, bed_file, output_dir, benchmarking_dir, reference_data_dir):
-    for items in [vcf_d5, vcf_d6, vcf_f7, vcf_m8]:
-        for item in items:
-            if not re.match(r'.*.vcf', item):
-                raise Exception(
-                    "The file (%s) must be with suffixes of .vcf" % item)       
+    for item in [vcf_d5, vcf_d6, vcf_f7, vcf_m8]:
+        if not re.match(r'.*.vcf', item):
+            raise Exception(
+                "The file (%s) must be with suffixes of .vcf" % item)       
 
     if bed_file:
         wdl_dir = '/venv/wes_workflow'
