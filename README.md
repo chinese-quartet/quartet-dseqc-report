@@ -1,6 +1,10 @@
-# quartet-dseqc-report
+# Quartet DSeQC Report
 
-Visualizes Quality Control(QC) results for Quartet Project.
+This Quartet quality control pipeline evaluate the performance of reads quality and variant calling quality.
+
+## How to run Quartet DSeQC Report
+
+See more details on [QDP Docs](https://docs.chinese-quartet.org/data_pipelines/genomics/intro/).
 
 ## Standalone Mode
 ### Prerequisite

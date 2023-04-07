@@ -82,9 +82,9 @@ def fq_workflow(d5_r1, d5_r2, d6_r1, d6_r2, f7_r1, f7_r2, m8_r1, m8_r2,
                 "The file (%s) must be with suffixes of _R2.fastq.gz or _R2.fq.gz" % item)        
 
     if bed_file:
-        wdl_dir = '/venv/wes_workflow'
+        wdl_dir = '/venv/wes-workflow'
     else:
-        wdl_dir = '/venv/wgs_workflow'
+        wdl_dir = '/venv/wgs-workflow'
 
     if not os.path.exists(wdl_dir):
         print("Cannot find the workflow, please contact the administrator.")
@@ -170,9 +170,9 @@ def vcf_workflow(vcf_d5, vcf_d6, vcf_f7, vcf_m8, platform, bed_file, output_dir,
                 "The file (%s) must be with suffixes of .vcf" % item)       
 
     if bed_file:
-        wdl_dir = '/venv/wes_workflow'
+        wdl_dir = '/venv/wes-workflow'
     else:
-        wdl_dir = '/venv/wgs_workflow'
+        wdl_dir = '/venv/wgs-workflow'
 
     if not os.path.exists(wdl_dir):
         print("Cannot find the workflow, please contact the administrator.")

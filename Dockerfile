@@ -90,7 +90,8 @@ RUN wget https://s3.amazonaws.com/sentieon-release/software/sentieon-genomics-20
 # # STAGE 2: runner
 # ###################
 
-FROM adoptopenjdk/openjdk8:x86_64-debianslim-jre8u345-b01 as runner
+# FROM adoptopenjdk/openjdk8:x86_64-debianslim-jre8u345-b01 as runner
+FROM adoptopenjdk/openjdk11:x86_64-debianslim-jre-11.0.18_10 as runner
 
 LABEL org.opencontainers.image.source https://github.com/chinese-quartet/quartet-dseqc-report.git
 
