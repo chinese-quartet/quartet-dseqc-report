@@ -69,17 +69,17 @@ def dseqc():
 @click.option('--output-dir', required=False,
               type=click.Path(exists=True, dir_okay=True, file_okay=False),
               help="The output directory.")
-def fq_workflow(d5_r1, d5_r2, d6_r1, d6_r2, f7_r1, f7_r2, m8_r1, m8_r2, 
+def fq_workflow(d5_r1, d5_r2, d6_r1, d6_r2, f7_r1, f7_r2, m8_r1, m8_r2,
                 platform, bed_file, output_dir, benchmarking_dir, fastq_screen_dir, reference_data_dir, sentieon_server):
     for item in [d5_r1, d6_r1, f7_r1, m8_r1]:
         if not re.match(r'.*_R1.(fastq|fq).gz', item):
             raise Exception(
                 "The file (%s) must be with suffixes of _R1.fastq.gz or _R1.fq.gz" % item)
-            
+
     for item in [d5_r2, d6_r2, f7_r2, m8_r2]:
         if not re.match(r'.*_R2.(fastq|fq).gz', item):
             raise Exception(
-                "The file (%s) must be with suffixes of _R2.fastq.gz or _R2.fq.gz" % item)        
+                "The file (%s) must be with suffixes of _R2.fastq.gz or _R2.fq.gz" % item)
 
     if bed_file:
         wdl_dir = '/venv/wes-workflow'
@@ -122,7 +122,8 @@ def fq_workflow(d5_r1, d5_r2, d6_r1, d6_r2, f7_r1, f7_r2, m8_r1, m8_r2,
                project_name=project_name, sample=data_dict)
 
     def call_cromwell(inputs_fpath, workflow_fpath, workflow_root, tasks_path):
-        cmd = ['cromwell', 'run', workflow_fpath, "-i", inputs_fpath,
+        cmd = ['java', '-Dconfig.file=/venv/cromwell-local.conf', '-jar',
+               '/venv/share/cromwell/cromwell.jar', 'run', workflow_fpath, "-i", inputs_fpath,
                "-p", tasks_path, "--workflow-root", workflow_root]
         print('Run workflow and output results to %s.' % workflow_root)
         proc = Popen(cmd, stdin=PIPE)
@@ -167,7 +168,7 @@ def vcf_workflow(vcf_d5, vcf_d6, vcf_f7, vcf_m8, platform, bed_file, output_dir,
     for item in [vcf_d5, vcf_d6, vcf_f7, vcf_m8]:
         if not re.match(r'.*.vcf', item):
             raise Exception(
-                "The file (%s) must be with suffixes of .vcf" % item)       
+                "The file (%s) must be with suffixes of .vcf" % item)
 
     if bed_file:
         wdl_dir = '/venv/wes-workflow'
@@ -204,7 +205,8 @@ def vcf_workflow(vcf_d5, vcf_d6, vcf_f7, vcf_m8, platform, bed_file, output_dir,
                project_name=project_name, sample=data_dict)
 
     def call_cromwell(inputs_fpath, workflow_fpath, workflow_root, tasks_path):
-        cmd = ['cromwell', 'run', workflow_fpath, "-i", inputs_fpath,
+        cmd = ['java', '-Dconfig.file=/venv/cromwell-local.conf',
+               '-jar', '/venv/share/cromwell/cromwell.jar', 'run', workflow_fpath, "-i", inputs_fpath,
                "-p", tasks_path, "--workflow-root", workflow_root]
         print('Run workflow and output results to %s.' % workflow_root)
         proc = Popen(cmd, stdin=PIPE)
@@ -225,10 +227,10 @@ def vcf_workflow(vcf_d5, vcf_d6, vcf_f7, vcf_m8, platform, bed_file, output_dir,
               type=click.Path(exists=True, dir_okay=True),
               help="A directory which will store the output report.")
 def report(result_dir, output_dir):
-        cmd = ['quartet-dseqc-report', '-d', result_dir, "-o", output_dir]
-        print('Run quartet-dseqc-report and output the report to %s.' % output_dir)
-        proc = Popen(cmd, stdin=PIPE)
-        proc.communicate()    
+    cmd = ['quartet-dseqc-report', '-d', result_dir, "-o", output_dir]
+    print('Run quartet-dseqc-report and output the report to %s.' % output_dir)
+    proc = Popen(cmd, stdin=PIPE)
+    proc.communicate()
 
 
 if __name__ == '__main__':
