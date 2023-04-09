@@ -95,7 +95,7 @@ FROM adoptopenjdk/openjdk11:x86_64-debianslim-jre-11.0.18_10 as runner
 
 LABEL org.opencontainers.image.source https://github.com/chinese-quartet/quartet-dseqc-report.git
 
-ENV PATH="/opt/conda/bin:/venv/bin:/varbenchtools:/opt/sentieon-genomics/bin:$PATH"
+ENV PATH="/venv/bin:/opt/conda/bin:/varbenchtools:/opt/sentieon-genomics/bin:$PATH"
 ENV LD_LIBRARY_PATH="/varbenchtools/lib/:$LD_LIBRARY_PATH"
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV FC_LANG en-US
@@ -134,4 +134,4 @@ COPY --from=builder /opt/sentieon-genomics /opt/sentieon-genomics
 COPY --from=builder /app/source/build/cromwell-local.conf /venv/cromwell-local.conf
 
 # Run it
-ENTRYPOINT ["dseqc.py"]
+ENTRYPOINT ["/opt/conda/bin/dseqc.py"]
