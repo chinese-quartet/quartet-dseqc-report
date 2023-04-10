@@ -76,8 +76,8 @@ RUN /opt/conda/bin/conda install -c conda-forge -c bioconda -c anaconda mamba bl
 ## hap.py must be ran in python2.7
 RUN /opt/conda/bin/mamba create -n venv -c bioconda -c conda-forge rtg-tools==3.12.1 hap.py==0.3.14 bedtools==2.27.1 picard==2.25.4 fastqc==0.11.8 fastq-screen==0.13.0 qualimap==2.1.1 cromwell==83
 
-## For multiqc in app, the multiqc version must be 1.8
-RUN /opt/conda/bin/conda create -n multiqc -c bioconda -c conda-forge -y multiqc==1.8
+## For multiqc in app, the multiqc version must be 1.8 (But 1.8 can't be installed, so we install 1.11 and try to test if it works)
+RUN /opt/conda/bin/conda create -n multiqc -c bioconda -c conda-forge -y multiqc==1.11
 
 # Pack the conda environment
 RUN conda-pack -n venv -o /tmp/env.tar && \
