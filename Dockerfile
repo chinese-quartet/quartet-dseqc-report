@@ -95,8 +95,10 @@ FROM adoptopenjdk/openjdk11:x86_64-debianslim-jre-11.0.18_10 as runner
 
 LABEL org.opencontainers.image.source https://github.com/chinese-quartet/quartet-dseqc-report.git
 
-# hap.py need python2.7, so we must place /venv/bin before /opt/conda/bin
-ENV PATH="/venv/bin:/opt/conda/bin:/varbenchtools:/opt/sentieon-genomics/bin:$PATH"
+# Hap.py need python2.7, so we must place /venv/bin before /opt/conda/bin
+# The app need an old multiqc version, so we must place /opt/conda/envs/multiqc/bin before /opt/conda/bin
+# The new multiqc version for quartet-dseqc-report is installed in /opt/conda/bin, so we must change the PATH before calling quartet-dseqc-report. More details on bin/quartet-dseqc-report script.
+ENV PATH="/venv/bin:/opt/conda/envs/multiqc/bin:/opt/conda/bin:/varbenchtools:/opt/sentieon-genomics/bin:$PATH"
 ENV LD_LIBRARY_PATH="/varbenchtools/lib/:$LD_LIBRARY_PATH"
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV FC_LANG en-US
@@ -114,13 +116,16 @@ RUN echo "**** Install dev packages ****" && \
     apt-get clean
 
 RUN wget https://repo.anaconda.com/miniconda/Miniconda3-py37_22.11.1-1-Linux-x86_64.sh -O miniconda.sh && bash miniconda.sh -b -p /opt/conda
-RUN /opt/conda/bin/conda install -c bioconda -c conda-forge -y python=3.9 multiqc==1.8
-## For app render.
+RUN /opt/conda/bin/conda install -c bioconda -c conda-forge -y python=3.9
+## For app render and qc report
 RUN /opt/conda/bin/pip install git+https://github.com/yjcyxky/biominer-app-util.git
 ADD ./resources/requirements.txt /data/requirements.txt
 ADD ./bin/dseqc.py /opt/conda/bin/dseqc.py
 ADD ./bin/quartet-dseqc-report /opt/conda/bin/quartet-dseqc-report
 RUN /opt/conda/bin/pip install -r /data/requirements.txt
+
+## For multiqc in app, the multiqc version must be 1.8
+RUN /opt/conda/bin/conda create -n multiqc -c bioconda -c conda-forge -y multiqc==1.8
 
 WORKDIR /data
 
