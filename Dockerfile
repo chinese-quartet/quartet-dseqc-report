@@ -74,7 +74,7 @@ RUN wget https://repo.anaconda.com/miniconda/Miniconda3-py37_22.11.1-1-Linux-x86
 RUN /opt/conda/bin/conda install -c conda-forge -c bioconda -c anaconda mamba blas lapack cxx-compiler conda-pack gfortran_linux-64
 ## Note: cromwell==83 must not deleted.
 ## hap.py must be ran in python2.7
-RUN /opt/conda/bin/mamba create -n venv -c bioconda -c conda-forge rtg-tools==3.12.1 hap.py==0.3.14 bedtools==2.27.1 picard==2.25.4 fastqc==0.11.8 multiqc==1.8 fastq-screen==0.13.0 qualimap==2.1.1 cromwell==83
+RUN /opt/conda/bin/mamba create -n venv -c bioconda -c conda-forge rtg-tools==3.12.1 hap.py==0.3.14 bedtools==2.27.1 picard==2.25.4 fastqc==0.11.8 fastq-screen==0.13.0 qualimap==2.1.1 cromwell==83
 
 # Pack the conda environment
 RUN conda-pack -n venv -o /tmp/env.tar && \
@@ -95,6 +95,7 @@ FROM adoptopenjdk/openjdk11:x86_64-debianslim-jre-11.0.18_10 as runner
 
 LABEL org.opencontainers.image.source https://github.com/chinese-quartet/quartet-dseqc-report.git
 
+# hap.py need python2.7, so we must place /venv/bin before /opt/conda/bin
 ENV PATH="/venv/bin:/opt/conda/bin:/varbenchtools:/opt/sentieon-genomics/bin:$PATH"
 ENV LD_LIBRARY_PATH="/varbenchtools/lib/:$LD_LIBRARY_PATH"
 ENV PYTHONDONTWRITEBYTECODE=1
@@ -113,7 +114,7 @@ RUN echo "**** Install dev packages ****" && \
     apt-get clean
 
 RUN wget https://repo.anaconda.com/miniconda/Miniconda3-py37_22.11.1-1-Linux-x86_64.sh -O miniconda.sh && bash miniconda.sh -b -p /opt/conda
-RUN /opt/conda/bin/conda install -y python=3.9
+RUN /opt/conda/bin/conda install -y python=3.9 multiqc==1.8
 ## For app render.
 RUN /opt/conda/bin/pip install git+https://github.com/yjcyxky/biominer-app-util.git
 ADD ./resources/requirements.txt /data/requirements.txt
