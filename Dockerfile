@@ -76,12 +76,21 @@ RUN /opt/conda/bin/conda install -c conda-forge -c bioconda -c anaconda mamba bl
 ## hap.py must be ran in python2.7
 RUN /opt/conda/bin/mamba create -n venv -c bioconda -c conda-forge rtg-tools==3.12.1 hap.py==0.3.14 bedtools==2.27.1 picard==2.25.4 fastqc==0.11.8 fastq-screen==0.13.0 qualimap==2.1.1 cromwell==83
 
+## For multiqc in app, the multiqc version must be 1.8
+RUN /opt/conda/bin/conda create -n multiqc -c bioconda -c conda-forge -y multiqc==1.8
+
 # Pack the conda environment
 RUN conda-pack -n venv -o /tmp/env.tar && \
   mkdir /venv && cd /venv && tar xf /tmp/env.tar && \
   rm /tmp/env.tar
 
 RUN /venv/bin/conda-unpack
+
+RUN conda-pack -n multiqc -o /tmp/env.tar && \
+  mkdir /multiqc && cd /multiqc && tar xf /tmp/env.tar && \
+  rm /tmp/env.tar
+
+RUN /multiqc/bin/conda-unpack
 
 # Sentieon Genomics
 RUN wget https://s3.amazonaws.com/sentieon-release/software/sentieon-genomics-201911.01.tar.gz && tar xzvf sentieon-genomics-201911.01.tar.gz && mv sentieon-genomics-201911.01 /opt/sentieon-genomics
@@ -96,9 +105,9 @@ FROM adoptopenjdk/openjdk11:x86_64-debianslim-jre-11.0.18_10 as runner
 LABEL org.opencontainers.image.source https://github.com/chinese-quartet/quartet-dseqc-report.git
 
 # Hap.py need python2.7, so we must place /venv/bin before /opt/conda/bin
-# The app need an old multiqc version, so we must place /opt/conda/envs/multiqc/bin before /opt/conda/bin
+# The app need an old multiqc version, so we must place /multiqc/bin before /opt/conda/bin
 # The new multiqc version for quartet-dseqc-report is installed in /opt/conda/bin, so we must change the PATH before calling quartet-dseqc-report. More details on bin/quartet-dseqc-report script.
-ENV PATH="/venv/bin:/opt/conda/envs/multiqc/bin:/opt/conda/bin:/varbenchtools:/opt/sentieon-genomics/bin:$PATH"
+ENV PATH="/venv/bin:/multiqc/bin:/opt/conda/bin:/varbenchtools:/opt/sentieon-genomics/bin:$PATH"
 ENV LD_LIBRARY_PATH="/varbenchtools/lib/:$LD_LIBRARY_PATH"
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV FC_LANG en-US
@@ -124,13 +133,11 @@ ADD ./bin/dseqc.py /opt/conda/bin/dseqc.py
 ADD ./bin/quartet-dseqc-report /opt/conda/bin/quartet-dseqc-report
 RUN /opt/conda/bin/pip install -r /data/requirements.txt
 
-## For multiqc in app, the multiqc version must be 1.8
-RUN /opt/conda/bin/conda create -n multiqc -c bioconda -c conda-forge -y multiqc==1.8
-
 WORKDIR /data
 
 COPY --from=builder /app/source/target/uberjar/quartet-dseqc-report*.jar /quartet-dseqc-report.jar
 COPY --from=builder /venv /venv
+COPY --from=builder /multiqc /multiqc
 COPY --from=builder /app/source/wes-workflow /venv/wes-workflow
 COPY --from=builder /app/source/wgs-workflow /venv/wgs-workflow
 COPY --from=builder /home/varbenchtools /varbenchtools
