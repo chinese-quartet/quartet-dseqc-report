@@ -114,7 +114,7 @@ RUN echo "**** Install dev packages ****" && \
     apt-get clean
 
 RUN wget https://repo.anaconda.com/miniconda/Miniconda3-py37_22.11.1-1-Linux-x86_64.sh -O miniconda.sh && bash miniconda.sh -b -p /opt/conda
-RUN /opt/conda/bin/conda install -y python=3.9 multiqc==1.8
+RUN /opt/conda/bin/conda install -c bioconda -c conda-forge -y python=3.9 multiqc==1.8
 ## For app render.
 RUN /opt/conda/bin/pip install git+https://github.com/yjcyxky/biominer-app-util.git
 ADD ./resources/requirements.txt /data/requirements.txt
