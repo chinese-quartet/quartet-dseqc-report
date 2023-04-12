@@ -85,16 +85,18 @@
   [fmc-datadir fmc-patterns fmc-destdir fmc-newdir]
   (let [files-keep (dseqc/batch-filter-files fmc-datadir fmc-patterns)
         files-keep-dir (fs-lib/join-paths fmc-destdir fmc-newdir)]
-    (fs-lib/create-directories! files-keep-dir)
     (if (empty? files-keep)
       (log/warn (format "Cannot find any files with pattern %s, please check your data." fmc-patterns))
-      (dseqc/copy-files! files-keep files-keep-dir {:replace-existing true}))))
+      (do
+        (fs-lib/create-directories! files-keep-dir)
+        (dseqc/copy-files! files-keep files-keep-dir {:replace-existing true})))))
 
 (defn copy-files-to-dir
   [data-dir dest-dir]
   (let [basename (fs-lib/base-name data-dir)
         dest-dir (fs-lib/join-paths dest-dir basename)]
     (filter-mkdir-copy (format "%s%s" data-dir "call-extract_tables") [".*.txt"] dest-dir "call-extract_tables")
+    (filter-mkdir-copy (format "%s%s" data-dir "call-extract_tables_vcf") [".*.txt"] dest-dir "call-extract_tables_vcf")
     (filter-mkdir-copy (format "%s%s" data-dir "call-qualimap_D5") [".*zip"] dest-dir "call-qualimap_D5")
     (filter-mkdir-copy (format "%s%s" data-dir "call-qualimap_D6") [".*zip"] dest-dir "call-qualimap_D6")
     (filter-mkdir-copy (format "%s%s" data-dir "call-qualimap_F7") [".*zip"] dest-dir "call-qualimap_F7")
@@ -103,7 +105,8 @@
     (filter-mkdir-copy (format "%s%s" data-dir "call-fastqc_D6") [".*.(zip|html)"] dest-dir "call-fastqc_D6")
     (filter-mkdir-copy (format "%s%s" data-dir "call-fastqc_F7") [".*.(zip|html)"] dest-dir "call-fastqc_F7")
     (filter-mkdir-copy (format "%s%s" data-dir "call-fastqc_M8") [".*.(zip|html)"] dest-dir "call-fastqc_M8")
-    (filter-mkdir-copy (format "%s%s" data-dir "call-merge_mendelian") [".*.summary.txt"] dest-dir "call-merge_mendelian")))
+    (filter-mkdir-copy (format "%s%s" data-dir "call-merge_mendelian") [".*.summary.txt"] dest-dir "call-merge_mendelian")
+    (filter-mkdir-copy (format "%s%s" data-dir "call-merge_mendelian_vcf") [".*.summary.txt"] dest-dir "call-merge_mendelian_vcf")))
 
 (defn make-report!
   "Chaining Pipeline: filter-files -> copy-files -> multiqc."
@@ -111,8 +114,8 @@
   (log/info "Generate quartet dnaseq report: " data-dir parameters dest-dir)
   (let [parameters-file (fs-lib/join-paths dest-dir "general_information.json")
         log-path (fs-lib/join-paths dest-dir "log")
-        subdirs (filter (fn [dir] (not= (clj-str/replace dir #"/$" "") 
-                                        (clj-str/replace dest-dir #"/$" ""))) 
+        subdirs (filter (fn [dir] (not= (clj-str/replace dir #"/$" "")
+                                        (clj-str/replace dest-dir #"/$" "")))
                         (dseqc/list-dirs data-dir))]
     (log/info "List subdirs: " subdirs)
     (try
