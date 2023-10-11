@@ -108,7 +108,7 @@ class MultiqcModule(BaseMultiqcModule):
       mendelian_snv = df[df.batch == bat][[col for col in df.columns if re.search('snv.*mendelian', col)]].values.mean()
       mendelian_indel = df[df.batch == bat][[col for col in df.columns if re.search('indel.*mendelian', col)]].values.mean()
       # Calculate the total score
-      beta2 = 0.5
+      beta2 = 0.25
       precision_beta = (1+beta2)*precision_snv*precision_indel/(beta2*precision_snv+precision_indel)
       recall_beta = (1+beta2)*recall_snv*recall_indel/(beta2*recall_snv+recall_indel)
       mendelian_beta = (1+beta2)*mendelian_snv*mendelian_indel/(beta2*mendelian_snv+mendelian_indel)
